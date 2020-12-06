@@ -25,3 +25,11 @@ name|the base name of the image files|`template-`|`?name=gamename-`, `?name=Ulti
 path|base path to files|`null`|`?path=.%2Fimg%2F` if files are in "img" sub-directory
 ext|the file extension of the files|`jpg`|`?ext=png` if you have .png files
 bg|the background color, **IMPORTANT**: always use 6 hex characters!|`999999`|`ffffff` if you want a white background
+
+## Controls inside the view
+
+Click and hold the mouse and move it around to rotate the view.
+
+Use the mouse wheel to zoom in/out.
+
+Use WASD or cursor keys to move the box around.
