@@ -6,7 +6,7 @@ Get the latest release at <https://github.com/theMK2k/bigbox3d/releases>.
 
 ## Usage
 
-Place the contents of this .zip file in your web directory.
+Place the contents of the .zip file in your web directory.
 
 Make sure you have 6 image files for each box according to each side of the box:
 
