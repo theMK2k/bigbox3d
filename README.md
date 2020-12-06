@@ -4,6 +4,8 @@ A 3D Big Box web viewer. Check out the Demo Site: <https://themk2k.github.io/big
 
 Get the latest release at <https://github.com/theMK2k/bigbox3d/releases>.
 
+![demo gif](https://themk2k.github.io/bigbox3d/demo.gif)
+
 ## Usage
 
 Place the contents of the .zip file in your web directory.
