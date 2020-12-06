@@ -1,6 +1,6 @@
 /**
  * BIG BOX 3D v1.0.0
- * ©2000 Jörg "MK2k" Sonntag
+ * ©2020 Jörg "MK2k" Sonntag
  */
 
 const opts = {
@@ -251,7 +251,7 @@ function degToRad(degrees) {
 
 function initBuffers() {
     console.log('initializing buffers');
-    
+
     vertBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
     const vertices = [
@@ -502,9 +502,9 @@ const mouseWheel = function (event) {
     perspectiveAngle += (event.deltaY < 0) ? -0.02 : 0.02;
     if (perspectiveAngle < 44) perspectiveAngle = 44;
     if (perspectiveAngle > 46) perspectiveAngle = 46;
-    
+
     // console.log('perspectiveAngle:', perspectiveAngle);
-    
+
     event.preventDefault();
 };
 
@@ -529,7 +529,7 @@ const keyDown = function (event) {
     if (event.code === 'ArrowLeft' || event.code === 'KeyA') {
         x = 0.1;
     }
-    
+
     perspectiveX += x;
     perspectiveY += y;
     //event.preventDefault();
@@ -580,7 +580,7 @@ function webGLStart() {
     canvas.addEventListener('wheel', mouseWheel, false);
 
     window.addEventListener('keydown', keyDown, false);
-    
+
     // Runs each time the DOM window resize event fires.
     // Resets the canvas dimensions to match window,
     // then draws the new borders accordingly.
@@ -599,7 +599,7 @@ function webGLStart() {
     // initBuffers();
 
     const baseFullPath = (opts.path || '') + opts.name;
-    
+
     initTexture(baseFullPath + 'front.' + opts.ext, texturen);
     initTexture(baseFullPath + 'back.' + opts.ext, texturen);
     initTexture(baseFullPath + 'top.' + opts.ext, texturen);
@@ -607,30 +607,35 @@ function webGLStart() {
     initTexture(baseFullPath + 'right.' + opts.ext, texturen);
     initTexture(baseFullPath + 'left.' + opts.ext, texturen);
 
-    gl.clearColor(hexToRgb(opts.bg).r, hexToRgb(opts.bg).g, hexToRgb(opts.bg).b, 1.0);
+    gl.clearColor(hexToRgb(opts.bg).r / 255., hexToRgb(opts.bg).g / 255., hexToRgb(opts.bg).b / 255., 1.0);
     gl.enable(gl.DEPTH_TEST);
     tick();
 }
 
-function getQueryVariable(variable){
-	const query = window.location.search.substring(1);
+function getQueryVariable(variable) {
+    const query = window.location.search.substring(1);
     const vars = query.split("&");
-	for (let i=0; i < vars.length; i++) {
-	    const pair = vars[i].split("=");
-		if (pair[0] == variable) {
+    for (let i = 0; i < vars.length; i++) {
+        const pair = vars[i].split("=");
+        if (pair[0] == variable) {
             return pair[1];
         }
-	}
-	return(false);
+    }
+    return (false);
 }
 
 function hexToRgb(hex) {
-    const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : null;
+    const matches = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+    const rgb = matches ? {
+            r: parseInt(matches[1], 16),
+            g: parseInt(matches[2], 16),
+            b: parseInt(matches[3], 16)
+        } : null;
+    
+    console.log('hexToRgb result:', rgb);
+
+    return rgb;
 }
 
 function init() {
@@ -639,7 +644,7 @@ function init() {
     opts.ext = getQueryVariable("ext") || opts.ext;
     opts.bg = '#' + (getQueryVariable("bg") || opts.bg);
 
-    document.getElementById("glcanvas").style.backgroundColor="#" + opts.bg;
+    document.getElementById("glcanvas").style.backgroundColor = opts.bg;
 
     console.log('opts:', opts);
 }
