@@ -1,0 +1,19 @@
+{
+  "name": "bigbox3d",
+  "version": "1.0.0",
+  "description": "A 3D Big Box web viewer. Check out the Demo Site: <https://themk2k.github.io/bigbox3d/>.",
+  "main": "bigbox3d.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/theMK2k/bigbox3d.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/theMK2k/bigbox3d/issues"
+  },
+  "homepage": "https://github.com/theMK2k/bigbox3d#readme"
+}
