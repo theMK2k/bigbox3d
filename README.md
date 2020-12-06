@@ -32,4 +32,4 @@ Click and hold the mouse and move it around to rotate the view.
 
 Use the mouse wheel to zoom in/out.
 
-Use WASD or cursor keys to move the box around.
+Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys to move the box around.
