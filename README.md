@@ -20,7 +20,7 @@ Make sure you have 6 image files for each box according to each side of the box:
 bigbox3d.html accepts the following URL parameters:
 
 parameter|description|default value|examples
--|-|-
+-|-|-|-
 name|the base name of the image files|`template-`|`?name=gamename-`, `?name=Ultimate%20DOOM_`
 path|base path to files|`null`|`?path=.%2Fimg%2F` if files are in "img" sub-directory
 ext|the file extension of the files|`jpg`|`?ext=png` if you have .png files
