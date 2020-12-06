@@ -1,4 +1,4 @@
-# bigbox3d
+# Big Box 3D
 
 A 3D Big Box web viewer. Check out the Demo Site: <https://themk2k.github.io/bigbox3d/>.
 
