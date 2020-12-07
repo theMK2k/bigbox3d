@@ -618,7 +618,6 @@ function webGLStart() {
     canvas.addEventListener('mouseout', mouseUp, false);
     canvas.addEventListener('mousemove', mouseMove, false);
     canvas.addEventListener('wheel', mouseWheel, false);
-    canvas.addEventListener('contextmenu', () => {}, false);
 
     window.addEventListener('keydown', keyDown, false);
 
