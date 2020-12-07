@@ -432,7 +432,7 @@ function animate() {
 
     const timeNow = new Date().getTime();
 
-    if (!drag) {
+    if ( dragMode === enmDragMode.none && lastDragMode === enmDragMode.rotate) {
         dX *= AMORTIZATION;
         dY *= AMORTIZATION;
         THETA += 20 * dX;
@@ -460,28 +460,54 @@ function tick() {
 
 // Mousedrag rotation with amortization
 // https://www.tutorialspoint.com/webgl/webgl_interactive_cube.htm
+const enmDragMode = {
+    none: 0,
+    rotate: 1,
+    move: 2
+}
 
 /*================= Mouse events ======================*/
 
 const AMORTIZATION = 0.91;
-let drag = false;
+let dragMode = enmDragMode.none;
+let lastDragMode = enmDragMode.rotate;  // initialize it with "rotate" so we can have our little rotation intro animation
 let old_x, old_y;
 let dX = 0.1, dY = -0.1;
 
 const mouseDown = function (e) {
-    drag = true;
+    
+    if (e.buttons === 1) {
+        dragMode = enmDragMode.rotate;
+    } else if (e.buttons === 2) {
+        dragMode = enmDragMode.move;
+    } else {
+        dragMode = enmDragMode.none;
+    }
+
     old_x = e.pageX, old_y = e.pageY;
     e.preventDefault();
     return false;
 };
 
 const mouseUp = function (e) {
-    drag = false;
+    lastDragMode = dragMode;
+    dragMode = enmDragMode.none;
+
+    e.preventDefault();
+    return false;
 };
 
 const mouseMove = function (e) {
-    if (!drag) return false;
+    if (dragMode === enmDragMode.none) {
+        return false;
+    } else if (dragMode === enmDragMode.rotate) {
+        rotateByMouse(e);
+    } else if (dragMode === enmDragMode.move) {
+        moveByMouse(e);
+    }
+};
 
+const rotateByMouse = function(e) {
     dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
     dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
 
@@ -490,7 +516,21 @@ const mouseMove = function (e) {
 
     old_x = e.pageX, old_y = e.pageY;
     e.preventDefault();
-};
+}
+
+const moveByMouse = function(e) {
+    dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
+    dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
+
+    // THETA += 20 * dX;
+    // PHI += 20 * dY;
+    perspectiveX += dX;
+    perspectiveY -= dY;
+    
+    
+    old_x = e.pageX, old_y = e.pageY;
+    e.preventDefault();
+}
 
 let perspectiveAngle = 45;
 let perspectiveX = 0;
@@ -578,6 +618,7 @@ function webGLStart() {
     canvas.addEventListener('mouseout', mouseUp, false);
     canvas.addEventListener('mousemove', mouseMove, false);
     canvas.addEventListener('wheel', mouseWheel, false);
+    canvas.addEventListener('contextmenu', () => {}, false);
 
     window.addEventListener('keydown', keyDown, false);
 
