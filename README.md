@@ -30,8 +30,10 @@ bg|the background color, **IMPORTANT**: always use 6 hex characters!|`999999`|`f
 
 ## Controls inside the view
 
-Click and hold the mouse and move it around to rotate the view.
+Click and hold the left mouse button and move it around to rotate the view.
 
-Use the mouse wheel to zoom in/out.
+Click and hold the right mouse button and move it around to move the box around.
 
 Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys to move the box around.
+
+Use the mouse wheel to zoom in/out.
