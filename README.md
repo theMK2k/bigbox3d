@@ -37,3 +37,9 @@ Click and hold the right mouse button and move it around to move the box around.
 Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys to move the box around.
 
 Use the mouse wheel to zoom in/out.
+
+## How to scan your box sides
+
+Scan the front and back of the box as if you would scan a letter or document.
+
+Scan the other sides (top, bottom, left and right) while the front of the box is facing towards you while operating the scanner.

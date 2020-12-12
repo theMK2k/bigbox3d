@@ -49,16 +49,19 @@ function calculateDimensions() {
 
     console.log('texturen:', texturen);
 
-    // var width_absolute = image_sources[tex_front].width + image_sources[tex_back].width + image_sources[tex_top].width + image_sources[tex_bottom].width;
-    const width_absolute = texturen[enmFaces.front].image.width + texturen[enmFaces.back].image.width + texturen[enmFaces.top].image.width + texturen[enmFaces.bottom].image.width;
+    // const width_absolute = image_sources[tex_front].width + image_sources[tex_back].width + image_sources[tex_top].width + image_sources[tex_bottom].width;
+    // const width_absolute = texturen[enmFaces.front].image.width + texturen[enmFaces.back].image.width + texturen[enmFaces.top].image.width + texturen[enmFaces.bottom].image.width;
+    const width_absolute = texturen[enmFaces.front].image.width + texturen[enmFaces.back].image.width + texturen[enmFaces.top].image.height + texturen[enmFaces.bottom].image.height;
     const width_mean = width_absolute / 4;
 
-    // var height_absolute = image_sources[tex_front].height + image_sources[tex_back].height + image_sources[tex_left].height + image_sources[tex_right].height;
-    const height_absolute = texturen[enmFaces.front].image.height + texturen[enmFaces.back].image.height + texturen[enmFaces.left].image.width + texturen[enmFaces.right].image.width;
+    // const height_absolute = image_sources[tex_front].height + image_sources[tex_back].height + image_sources[tex_left].height + image_sources[tex_right].height;
+    // const height_absolute = texturen[enmFaces.front].image.height + texturen[enmFaces.back].image.height + texturen[enmFaces.left].image.width + texturen[enmFaces.right].image.width;
+    const height_absolute = texturen[enmFaces.front].image.height + texturen[enmFaces.back].image.height + texturen[enmFaces.left].image.height + texturen[enmFaces.right].image.height;
     const height_mean = height_absolute / 4;
 
-    // var depth_absolute = image_sources[tex_top].height + image_sources[tex_bottom].height + image_sources[tex_left].width + image_sources[tex_right].width;
-    const depth_absolute = texturen[enmFaces.top].image.height + texturen[enmFaces.bottom].image.height + texturen[enmFaces.left].image.height + texturen[enmFaces.right].image.height;
+    // const depth_absolute = image_sources[tex_top].height + image_sources[tex_bottom].height + image_sources[tex_left].width + image_sources[tex_right].width;
+    // const depth_absolute = texturen[enmFaces.top].image.height + texturen[enmFaces.bottom].image.height + texturen[enmFaces.left].image.height + texturen[enmFaces.right].image.height;
+    const depth_absolute = texturen[enmFaces.top].image.width + texturen[enmFaces.bottom].image.width + texturen[enmFaces.left].image.width + texturen[enmFaces.right].image.width;
     const depth_mean = depth_absolute / 4;
 
     console.log('width_mean:', width_mean);
@@ -268,28 +271,28 @@ function initBuffers() {
         1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
 
         // Top face
-        -1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
         -1.0 * dimensions.width, 1.0 * dimensions.height, 1.0 * dimensions.depth,
         1.0 * dimensions.width, 1.0 * dimensions.height, 1.0 * dimensions.depth,
         1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
+        -1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
 
         // Bottom face
+        -1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
         -1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
         1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
         1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
-        -1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
 
         // Right face
-        1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
         1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
         1.0 * dimensions.width, 1.0 * dimensions.height, 1.0 * dimensions.depth,
         1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
+        1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
 
         // Left face
+        -1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
         -1.0 * dimensions.width, -1.0 * dimensions.height, -1.0 * dimensions.depth,
         -1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
         -1.0 * dimensions.width, 1.0 * dimensions.height, 1.0 * dimensions.depth,
-        -1.0 * dimensions.width, 1.0 * dimensions.height, -1.0 * dimensions.depth,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
