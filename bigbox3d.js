@@ -442,8 +442,8 @@ function animate() {
 }
 
 
-function tick() {
-    requestAnimationFrame(tick);
+function redraw() {
+    requestAnimationFrame(redraw);
     drawScene();
     animate();
 }
@@ -615,10 +615,12 @@ function webGLStart() {
     // Resets the canvas dimensions to match window,
     // then draws the new borders accordingly.
     function resizeCanvas() {
+        console.log('resize canvas!');
         canvas.width = window.innerWidth;           // -20
-        canvas.height = window.innerHeight - 4;     // -20
-        //redraw();
+        canvas.height = window.innerHeight;     // -20
+        redraw();
     }
+
     resizeCanvas();
 
     //const gl = canvas.getContext('webgl');
@@ -639,7 +641,7 @@ function webGLStart() {
 
     gl.clearColor(hexToRgb(opts.bg).r / 255., hexToRgb(opts.bg).g / 255., hexToRgb(opts.bg).b / 255., 1.0);
     gl.enable(gl.DEPTH_TEST);
-    tick();
+    redraw();
 }
 
 function getQueryVariable(variable) {
