@@ -132,35 +132,30 @@ function initShaders() {
     const fragmentShader = getShader(gl, "shader-fs");
     const vertexShader = getShader(gl, "shader-vs");
 
-    shaderProgram = gl.createProgram();
-    gl.attachShader(shaderProgram, vertexShader);
-    gl.attachShader(shaderProgram, fragmentShader);
-    gl.linkProgram(shaderProgram);
+    shaderProgram = {};
+    shaderProgram.program = gl.createProgram();
 
-    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+
+    // shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram.program, vertexShader);
+    gl.attachShader(shaderProgram.program, fragmentShader);
+    gl.linkProgram(shaderProgram.program);
+
+    if (!gl.getProgramParameter(shaderProgram.program, gl.LINK_STATUS)) {
         alert("Could not initialise shaders");
     }
 
-    gl.useProgram(shaderProgram);
+    gl.useProgram(shaderProgram.program);
 
-    // This is a bad code.
-    // If the context is lsot shaderProgram will be null
-    // and trying to assign a vertexPositionAttribute to null
-    // will throw an exception.
-    // better would be 
-    // shaderProgram = {};
-    // shaderProgram.program = gl.createProgram();
-    // shaderProgram.vertexPositionAtrribute = ...
-    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(shaderProgram, "aVertexPosition");
-    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+    shaderProgram.program.vertexPositionAttribute = gl.getAttribLocation(shaderProgram.program, "aVertexPosition");
+    gl.enableVertexAttribArray(shaderProgram.program.vertexPositionAttribute);
 
-    shaderProgram.textureCoordAttribute = gl.getAttribLocation(shaderProgram, "aTextureCoord");
-    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+    shaderProgram.program.textureCoordAttribute = gl.getAttribLocation(shaderProgram.program, "aTextureCoord");
+    gl.enableVertexAttribArray(shaderProgram.program.textureCoordAttribute);
 
-    shaderProgram.pMatrixUniform = gl.getUniformLocation(shaderProgram, "uPMatrix");
-    shaderProgram.mvMatrixUniform = gl.getUniformLocation(shaderProgram, "uMVMatrix");
-    shaderProgram.samplerUniform = gl.getUniformLocation(shaderProgram, "uSampler");
-
+    shaderProgram.program.pMatrixUniform = gl.getUniformLocation(shaderProgram.program, "uPMatrix");
+    shaderProgram.program.mvMatrixUniform = gl.getUniformLocation(shaderProgram.program, "uMVMatrix");
+    shaderProgram.program.samplerUniform = gl.getUniformLocation(shaderProgram.program, "uSampler");
 }
 
 
@@ -168,21 +163,14 @@ const texturen = new Array();
 let allTexturesLoaded = false;
 function initTexture(sFilename, textures) {
     const anz = textures.length;
-    textures[anz] = gl.createTexture();
+    textures[anz] = {};
+    textures[anz].texture = gl.createTexture();
 
-    //texturen[anz].generateMipmaps = false;
-
-    // this is a bad code. on context lost gl.createTexture() will return null and
-    // an exception will be thrown when you try to attach .image to null
-    // Better would be
-    // texturen[anz] = {};
-    // texturen[anz].texture = gl.createTexture();
-    // texturen[anz].image = new Image();
     textures[anz].image = new Image();
     textures[anz].image.onload = function () {
         textures[anz].isLoaded = true;
 
-        gl.bindTexture(gl.TEXTURE_2D, textures[anz]);
+        gl.bindTexture(gl.TEXTURE_2D, textures[anz].texture);
         gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, false);
 
         gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, textures[anz].image);
@@ -230,8 +218,8 @@ function mvPopMatrix() {
 
 
 function setMatrixUniforms() {
-    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+    gl.uniformMatrix4fv(shaderProgram.program.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.program.mvMatrixUniform, false, mvMatrix);
 
     // Scaling
     // https://www.tutorialspoint.com/webgl/webgl_scaling.htm
@@ -255,8 +243,9 @@ function degToRad(degrees) {
 function initBuffers() {
     console.log('initializing buffers');
 
-    vertBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
+    vertBuffer = {};
+    vertBuffer.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer.buffer);
     const vertices = [
         // Front face
         -1.0 * dimensions.width, -1.0 * dimensions.height, 1.0 * dimensions.depth,
@@ -296,14 +285,12 @@ function initBuffers() {
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
 
-    // This is bad code. See the above examples of bad code.
-    // vertBuffer will be null on context lost and this code
-    // will throw an exception.
     vertBuffer.itemSize = 3;
     vertBuffer.numItems = 24;
 
-    CoordBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, CoordBuffer);
+    coordBuffer = {};
+    coordBuffer.buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, coordBuffer.buffer);
     const textureCoords = [
         // Front face
         0.0, 1.0,
@@ -342,8 +329,8 @@ function initBuffers() {
         1.0, 0.0,
     ];
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-    CoordBuffer.itemSize = 2;
-    CoordBuffer.numItems = 24;
+    coordBuffer.itemSize = 2;
+    coordBuffer.numItems = 24;
 
     IndexBuffer = gl.createBuffer();
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
@@ -393,34 +380,34 @@ function drawScene() {
 
     setMatrixUniforms();
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer);
-    gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, CoordBuffer);
-    gl.vertexAttribPointer(shaderProgram.textureCoordAttribute, CoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer.buffer);
+    gl.vertexAttribPointer(shaderProgram.program.vertexPositionAttribute, vertBuffer.itemSize, gl.FLOAT, false, 0, 0);
+    gl.bindBuffer(gl.ARRAY_BUFFER, coordBuffer.buffer);
+    gl.vertexAttribPointer(shaderProgram.program.textureCoordAttribute, coordBuffer.itemSize, gl.FLOAT, false, 0, 0);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
 
     // Draw face 0
-    gl.bindTexture(gl.TEXTURE_2D, texturen[0]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[0].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
     // Draw face 1
-    gl.bindTexture(gl.TEXTURE_2D, texturen[1]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[1].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 12);
 
     // Draw face 2
-    gl.bindTexture(gl.TEXTURE_2D, texturen[2]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[2].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
 
     // Draw face 3
-    gl.bindTexture(gl.TEXTURE_2D, texturen[3]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[3].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 36);
 
     // Draw face 4
-    gl.bindTexture(gl.TEXTURE_2D, texturen[4]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[4].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 48);
 
     // Draw face 5
-    gl.bindTexture(gl.TEXTURE_2D, texturen[5]);
+    gl.bindTexture(gl.TEXTURE_2D, texturen[5].texture);
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 60);
 }
 
@@ -435,7 +422,7 @@ function animate() {
 
     const timeNow = new Date().getTime();
 
-    if ( dragMode === enmDragMode.none && lastDragMode === enmDragMode.rotate) {
+    if (dragMode === enmDragMode.none && lastDragMode === enmDragMode.rotate) {
         dX *= AMORTIZATION;
         dY *= AMORTIZATION;
         THETA += 20 * dX;
@@ -478,7 +465,7 @@ let old_x, old_y;
 let dX = 0.1, dY = -0.1;
 
 const mouseDown = function (e) {
-    
+
     if (e.buttons === 1) {
         dragMode = enmDragMode.rotate;
     } else if (e.buttons === 2) {
@@ -510,7 +497,7 @@ const mouseMove = function (e) {
     }
 };
 
-const rotateByMouse = function(e) {
+const rotateByMouse = function (e) {
     dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
     dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
 
@@ -521,7 +508,7 @@ const rotateByMouse = function(e) {
     e.preventDefault();
 }
 
-const moveByMouse = function(e) {
+const moveByMouse = function (e) {
     dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
     dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
 
@@ -529,8 +516,8 @@ const moveByMouse = function(e) {
     // PHI += 20 * dY;
     perspectiveX += dX;
     perspectiveY -= dY;
-    
-    
+
+
     old_x = e.pageX, old_y = e.pageY;
     e.preventDefault();
 }
@@ -671,11 +658,11 @@ function hexToRgb(hex) {
     const matches = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
 
     const rgb = matches ? {
-            r: parseInt(matches[1], 16),
-            g: parseInt(matches[2], 16),
-            b: parseInt(matches[3], 16)
-        } : null;
-    
+        r: parseInt(matches[1], 16),
+        g: parseInt(matches[2], 16),
+        b: parseInt(matches[3], 16)
+    } : null;
+
     console.log('hexToRgb result:', rgb);
 
     return rgb;
