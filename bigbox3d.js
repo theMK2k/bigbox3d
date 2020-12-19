@@ -3,11 +3,99 @@
  * ©2020 Jörg "MK2k" Sonntag
  */
 
+// #region Logger
+// Our own logging implementation with loglevel definition
+const enmLogLevels = {
+    TRACE: 0,
+    DEBUG: 1,
+    LOG: 2,
+    INFO: 3,
+    WARN: 4,
+    ERROR: 5
+}
+
+const logger = {
+    logLevel: enmLogLevels.WARN,
+    trace: function (...data) {
+        if (this.logLevel > enmLogLevels.TRACE) {
+            return;
+        }
+
+        console.trace('bigbox3d', data);
+    },
+    debug: function (...data) {
+        if (this.logLevel > enmLogLevels.DEBUG) {
+            return;
+        }
+
+        console.debug('bigbox3d', data);
+    },
+    log: function (...data) {
+        if (this.logLevel > enmLogLevels.LOG) {
+            return;
+        }
+
+        console.log('bigbox3d', data);
+    },
+    log: function (...data) {
+        if (this.logLevel > enmLogLevels.INFO) {
+            return;
+        }
+
+        console.info('bigbox3d', data);
+    },
+    warn: function (...data) {
+        if (this.logLevel > enmLogLevels.WARN) {
+            return;
+        }
+
+        console.warn('bigbox3d', data);
+    },
+    error: function (...data) {
+        if (this.logLevel > enmLogLevels.ERROR) {
+            return;
+        }
+
+        console.error('bigbox3d', data);
+    }
+}
+
+const storedLogLevel = localStorage.getItem('logLevel');
+if (isNumeric(storedLogLevel)) {
+    logger.logLevel = parseInt(storedLogLevel);
+} else {
+    logger.logLevel = enmLogLevels.WARN;
+}
+
+function getLogLevel(level) {
+    let result = null;
+    Object.keys(enmLogLevels).forEach(key => {
+        if (enmLogLevels[key] === level) {
+            result = key;
+        }
+    });
+    return result;
+}
+
+console.info('bigbox3d', 'logLevel is', getLogLevel(logger.logLevel));
+console.info('bigbox3d', 'you can set another level by storing logLevel as Integer in localStorage');
+
+// Logger Tests - not needed in production
+// logger.trace('trace this', { test: 'test' });
+// logger.debug('debug this', { test: 'test' });
+// logger.log('log this', { test: 'test' });
+// logger.warn('warn this', { test: 'test' });
+// logger.error('error this', { test: 'test' });
+
+// #endregion Logger
+
 const opts = {
     name: 'template-',  // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
     path: null,         // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
     ext: 'jpg',         // the file extension of the files, e.g. "?ext=png" if you have .png files
-    bg: '999999',      // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+    bg: '999999',       // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+    nomouse: false,     // DEBUG ONLY: don't handle mouse events
+    debug: false,       // DEBUG ONLY: active debug mode
 }
 
 let basePath = '';
@@ -40,6 +128,12 @@ const dimensions = {
 
 let zoom = 1.4;
 
+function isNumeric(str) {
+    if (typeof str != "string") return false
+    return !isNaN(str) &&
+        !isNaN(parseFloat(str))
+}
+
 let dimensionsCalculated = false;
 
 function calculateDimensions() {
@@ -47,7 +141,7 @@ function calculateDimensions() {
         return;
     }
 
-    console.log('texturen:', texturen);
+    logger.log('texturen:', texturen);
 
     // const width_absolute = image_sources[tex_front].width + image_sources[tex_back].width + image_sources[tex_top].width + image_sources[tex_bottom].width;
     // const width_absolute = texturen[enmFaces.front].image.width + texturen[enmFaces.back].image.width + texturen[enmFaces.top].image.width + texturen[enmFaces.bottom].image.width;
@@ -64,9 +158,9 @@ function calculateDimensions() {
     const depth_absolute = texturen[enmFaces.top].image.width + texturen[enmFaces.bottom].image.width + texturen[enmFaces.left].image.width + texturen[enmFaces.right].image.width;
     const depth_mean = depth_absolute / 4;
 
-    console.log('width_mean:', width_mean);
-    console.log('height_mean:', height_mean);
-    console.log('depth_mean:', depth_mean);
+    logger.log('width_mean:', width_mean);
+    logger.log('height_mean:', height_mean);
+    logger.log('depth_mean:', depth_mean);
 
     // We assume width = 1, all others must adhere to that
     dimensions.height = (height_mean / width_mean);
@@ -96,7 +190,6 @@ function initGL(canvas) {
     }
 }
 
-
 function getShader(gl, id) {
     const shaderScript = document.getElementById(id);
     if (!shaderScript) {
@@ -124,7 +217,6 @@ function getShader(gl, id) {
 
     return shader;
 }
-
 
 let shaderProgram;
 
@@ -158,9 +250,9 @@ function initShaders() {
     shaderProgram.program.samplerUniform = gl.getUniformLocation(shaderProgram.program, "uSampler");
 }
 
-
 const texturen = new Array();
 let allTexturesLoaded = false;
+
 function initTexture(sFilename, textures) {
     const anz = textures.length;
     textures[anz] = {};
@@ -181,7 +273,7 @@ function initTexture(sFilename, textures) {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);  //gl.NEAREST
 
         if (extAnisotropic && gl.getParameter(extAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT) > 1) {
-            console.log('Anisotropic Filtering enabled:', gl.getParameter(extAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT));
+            logger.log('Anisotropic Filtering enabled:', gl.getParameter(extAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT));
             gl.texParameterf(gl.TEXTURE_2D, extAnisotropic.TEXTURE_MAX_ANISOTROPY_EXT, extAnisotropic.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
         }
 
@@ -193,7 +285,7 @@ function initTexture(sFilename, textures) {
         });
 
         if (allTexturesLoaded) {
-            console.log('all textures loaded!');
+            logger.log('all textures loaded!');
         }
     }
     textures[anz].image.src = sFilename;
@@ -216,24 +308,9 @@ function mvPopMatrix() {
     mvMatrix = mvMatrixStack.pop();
 }
 
-
 function setMatrixUniforms() {
     gl.uniformMatrix4fv(shaderProgram.program.pMatrixUniform, false, pMatrix);
     gl.uniformMatrix4fv(shaderProgram.program.mvMatrixUniform, false, mvMatrix);
-
-    // Scaling
-    // https://www.tutorialspoint.com/webgl/webgl_scaling.htm
-    // let xformMatrix = new Float32Array([
-    // 	dimensions.width,   0.0,  0.0,  0.0,
-    //    0.0,  dimensions.height,   0.0,  0.0,
-    //    0.0,  0.0,  dimensions.depth,   0.0,
-    //    0.0,  0.0,  0.0,  1.0  
-    // ]);
-    // console.log('xformMatrix:', xformMatrix);
-
-    // let u_xformMatrix = gl.getUniformLocation(shaderProgram, 'u_xformMatrix');
-    // gl.uniformMatrix4fv(u_xformMatrix, false, xformMatrix);
-    // Scaling End
 }
 
 function degToRad(degrees) {
@@ -241,7 +318,7 @@ function degToRad(degrees) {
 }
 
 function initBuffers() {
-    console.log('initializing buffers');
+    logger.log('initializing buffers');
 
     vertBuffer = {};
     vertBuffer.buffer = gl.createBuffer();
@@ -347,7 +424,6 @@ function initBuffers() {
     IndexBuffer.numItems = 36;
 }
 
-
 let xRot = 0;
 let yRot = 0;
 let zRot = 0;
@@ -411,7 +487,6 @@ function drawScene() {
     gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 60);
 }
 
-
 let lastTime = 0;
 
 let THETA = 0;
@@ -432,15 +507,11 @@ function animate() {
     if (lastTime != 0) {
         const elapsed = timeNow - lastTime;
 
-        //xRot += (90 * elapsed) / 5000.0;
-        //yRot += (90 * elapsed) / 5000.0;
         xRot = PHI;
         yRot = THETA;
-        //zRot += (90 * elapsed) / 5000.0;
     }
     lastTime = timeNow;
 }
-
 
 function redraw() {
     requestAnimationFrame(redraw);
@@ -462,42 +533,9 @@ const AMORTIZATION = 0.91;
 let dragMode = enmDragMode.none;
 let lastDragMode = enmDragMode.rotate;  // initialize it with "rotate" so we can have our little rotation intro animation
 let old_x, old_y;
-let dX = 0.1, dY = -0.1;
+let dX = 0.15, dY = -0.15;
 
-const mouseDown = function (e) {
-
-    if (e.buttons === 1) {
-        dragMode = enmDragMode.rotate;
-    } else if (e.buttons === 2) {
-        dragMode = enmDragMode.move;
-    } else {
-        dragMode = enmDragMode.none;
-    }
-
-    old_x = e.pageX, old_y = e.pageY;
-    e.preventDefault();
-    return false;
-};
-
-const mouseUp = function (e) {
-    lastDragMode = dragMode;
-    dragMode = enmDragMode.none;
-
-    e.preventDefault();
-    return false;
-};
-
-const mouseMove = function (e) {
-    if (dragMode === enmDragMode.none) {
-        return false;
-    } else if (dragMode === enmDragMode.rotate) {
-        rotateByMouse(e);
-    } else if (dragMode === enmDragMode.move) {
-        moveByMouse(e);
-    }
-};
-
-const rotateByMouse = function (e) {
+const rotate = function (e) {
     dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
     dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
 
@@ -508,15 +546,12 @@ const rotateByMouse = function (e) {
     e.preventDefault();
 }
 
-const moveByMouse = function (e) {
+const move = function (e) {
     dX = (e.pageX - old_x) * 2 * Math.PI / canvas.width;
     dY = (e.pageY - old_y) * 2 * Math.PI / canvas.height;
 
-    // THETA += 20 * dX;
-    // PHI += 20 * dY;
     perspectiveX += dX;
     perspectiveY -= dY;
-
 
     old_x = e.pageX, old_y = e.pageY;
     e.preventDefault();
@@ -529,17 +564,19 @@ let perspectiveY = 0;
 const mouseWheel = function (event) {
     if (!allTexturesLoaded) return;
 
-    perspectiveAngle += (event.deltaY < 0) ? -0.02 : 0.02;
+    if (event.deltaY !== 0) {
+        perspectiveAngle += (event.deltaY < 0) ? -0.02 : 0.02;
+    }
     if (perspectiveAngle < 44) perspectiveAngle = 44;
     if (perspectiveAngle > 46) perspectiveAngle = 46;
 
-    // console.log('perspectiveAngle:', perspectiveAngle);
+    logger.log('perspectiveAngle:', perspectiveAngle);
 
     event.preventDefault();
 };
 
 const keyDown = function (event) {
-    console.log('keyDown:', event);
+    logger.log('keyDown:', event);
 
     let x = 0;
     let y = 0;
@@ -563,6 +600,121 @@ const keyDown = function (event) {
     perspectiveX += x;
     perspectiveY += y;
     //event.preventDefault();
+}
+
+/* TOUCH */
+const pointerCache = new Array();
+const pinch = {
+    initialPerspectiveAngle: null,  // float; the perspective Angle when the second pointer is added
+    initialDistance: null,          // float; the distance between pointers when the second pointer is added
+    initialCenter: null,            // { x: float, y: float }; the center between pointers when the second pointer is added
+};
+
+function getDistance(point1, point2) {
+    const a = point1.clientX - point2.clientX;
+    const b = point1.clientY - point2.clientY;
+
+    return Math.sqrt(a * a + b * b);
+}
+
+function getCenter(point1, point2) {
+    const x = (point1.clientX + point2.clientX) / 2;
+    const y = (point1.clientY + point2.clientY) / 2;
+
+    return {x, y};
+}
+
+function onPointerDown(e) {
+    // The pointerdown event signals the start of a touch interaction.
+    // This event is cached to support 2-finger gestures
+    logger.log("onPointerDown", e);
+
+    if (!pointerCache.find(pointer => pointer.pointerId === e.pointerId)) {
+        pointerCache.push(e);
+    }
+
+    if (pointerCache.length === 1) {
+        // initialize rotate/move with held button
+        if (e.buttons === 1) {
+            dragMode = enmDragMode.rotate;
+        } else if (e.buttons === 2) {
+            dragMode = enmDragMode.move;
+        } else {
+            dragMode = enmDragMode.none;
+        }
+    
+        old_x = e.pageX, old_y = e.pageY;
+    }
+
+    if (pointerCache.length === 2) {
+        // initialize zoom/move with 2 fingers
+        pinch.initialPerspectiveAngle = perspectiveAngle;
+        pinch.initialDistance = getDistance(pointerCache[0], pointerCache[1]);
+        pinch.initialCenter = getCenter(pointerCache[0], pointerCache[1]);
+    }
+    
+    e.preventDefault();
+    return false;
+}
+
+function onPointerMove(e) {
+    logger.log("pointerMove", e);
+
+    // pointerCache.length === 2 -> pinchZoom or 2-finger move
+    // pointerCache.length === 1, ev.buttons -> rotate or move
+
+    // Update pointerCache
+    for (let i = 0; i < pointerCache.length; i++) {
+        if (e.pointerId == pointerCache[i].pointerId) {
+            pointerCache[i] = e;
+            break;
+        }
+    }
+
+    if (pointerCache.length === 1) {
+        if (dragMode === enmDragMode.none) {
+            return false;
+        } else if (dragMode === enmDragMode.rotate) {
+            rotate(e);
+        } else if (dragMode === enmDragMode.move) {
+            move(e);
+        }
+    }
+
+    // If two pointers are down, check for pinch gestures
+    if (pointerCache.length === 2) {
+        const distance = getDistance(pointerCache[0], pointerCache[1]);
+
+        const diff = pinch.initialDistance - distance;
+
+        perspectiveAngle = pinch.initialPerspectiveAngle + diff * 0.01;
+        
+        if (perspectiveAngle < 44) perspectiveAngle = 44;
+        if (perspectiveAngle > 46) perspectiveAngle = 46;
+    }
+
+    e.preventDefault();
+    return false;
+}
+
+function onPointerUp(e) {
+    logger.log('onPointerUp', e);
+    
+    if (pointerCache.length === 1) {
+        lastDragMode = dragMode;
+        dragMode = enmDragMode.none;
+    }
+
+    // Remove this pointer from the pointerCache
+    for (let i = 0; i < pointerCache.length; i++) {
+        if (pointerCache[i].pointerId == e.pointerId) {
+            pointerCache.splice(i, 1);
+            break;
+        }
+    }
+
+    e.preventDefault();
+    return false;
 }
 
 /*=========================rotation================*/
@@ -603,19 +755,27 @@ function webGLStart() {
 
     window.addEventListener('resizeCanvas', canvas, false);
 
-    canvas.addEventListener('mousedown', mouseDown, false);
-    canvas.addEventListener('mouseup', mouseUp, false);
-    canvas.addEventListener('mouseout', mouseUp, false);
-    canvas.addEventListener('mousemove', mouseMove, false);
-    canvas.addEventListener('wheel', mouseWheel, false);
+    if (!opts.nomouse) {
+        canvas.addEventListener('wheel', mouseWheel, false);
+    }
 
     window.addEventListener('keydown', keyDown, false);
+
+    canvas.onpointerdown = onPointerDown;
+    canvas.onpointermove = onPointerMove;
+
+    // Use same handler for pointer{up,cancel,out,leave} events since
+    // the semantics for these events - in this app - are the same.
+    canvas.onpointerup = onPointerUp;
+    canvas.onpointercancel = onPointerUp;
+    canvas.onpointerout = onPointerUp;
+    canvas.onpointerleave = onPointerUp;
 
     // Runs each time the DOM window resize event fires.
     // Resets the canvas dimensions to match window,
     // then draws the new borders accordingly.
     function resizeCanvas() {
-        console.log('resize canvas!');
+        logger.log('resize canvas!');
         canvas.width = window.innerWidth;           // -20
         canvas.height = window.innerHeight;     // -20
         redraw();
@@ -644,6 +804,7 @@ function webGLStart() {
     redraw();
 }
 
+
 function getQueryVariable(variable) {
     const query = window.location.search.substring(1);
     const vars = query.split("&");
@@ -665,7 +826,7 @@ function hexToRgb(hex) {
         b: parseInt(matches[3], 16)
     } : null;
 
-    console.log('hexToRgb result:', rgb);
+    logger.log('hexToRgb result:', rgb);
 
     return rgb;
 }
@@ -675,10 +836,14 @@ function init() {
     opts.path = getQueryVariable("path") || opts.path;
     opts.ext = getQueryVariable("ext") || opts.ext;
     opts.bg = '#' + (getQueryVariable("bg") || opts.bg);
+    opts.nomouse = getQueryVariable("nomouse") || opts.nomouse;
+    opts.debug = getQueryVariable("debug") || opts.debug;
 
-    document.getElementById("glcanvas").style.backgroundColor = opts.bg;
+    const canvas = document.getElementById("glcanvas");
 
-    console.log('opts:', opts);
+    canvas.style.backgroundColor = opts.bg;
+
+    logger.log('opts:', opts);
 }
 
 init();
