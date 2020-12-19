@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/theMK2k/bigbox3d/issues"
   },
-  "homepage": "https://github.com/theMK2k/bigbox3d#readme"
+  "homepage": "https://github.com/theMK2k/bigbox3d#readme",
+  "devDependencies": {
+    "babel-preset-es2015": "^6.24.1"
+  }
 }

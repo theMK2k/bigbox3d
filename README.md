@@ -30,13 +30,25 @@ bg|the background color, **IMPORTANT**: always use 6 hex characters!|`999999`|`?
 
 ## Controls inside the view
 
-Click and hold the left mouse button and move it around to rotate the view.
+### Mouse
 
-Click and hold the right mouse button and move it around to move the box around.
+Rotate: click and hold the left mouse button
 
-Use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys to move the box around.
+Move: click and hold the right mouse button
 
-Use the mouse wheel to zoom in/out.
+Zoom: use the mouse wheel
+
+### Touch
+
+Rotate: use one finger
+
+Move: use two fingers
+
+Zoom: use two fingers and pinch
+
+### Keyboard
+
+Move: use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys
 
 ## How to scan your box sides
 

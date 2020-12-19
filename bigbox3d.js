@@ -195,7 +195,7 @@ function getShader(gl, id) {
         return null;
     }
 
-    str = shaderScript.text;
+    const str = shaderScript.text;
 
     let shader;
     if (shaderScript.type == "x-shader/x-fragment") {
@@ -290,7 +290,7 @@ function initTexture(sFilename, textures) {
     textures[anz].image.src = sFilename;
 }
 
-const mvMatrix = mat4.create();
+let mvMatrix = mat4.create();
 const mvMatrixStack = [];
 const pMatrix = mat4.create();
 
@@ -315,6 +315,10 @@ function setMatrixUniforms() {
 function degToRad(degrees) {
     return degrees * Math.PI / 180;
 }
+
+let vertBuffer = null;
+let coordBuffer = null;
+let IndexBuffer = null;
 
 function initBuffers() {
     logger.log('initializing buffers');
@@ -626,7 +630,7 @@ function getCenter(point1, point2) {
 function onPointerDown(e) {
     // The pointerdown event signals the start of a touch interaction.
     // This event is cached to support 2-finger gestures
-    logger.log("onPointerDown", e);
+    // logger.log("onPointerDown", e);
 
     if (!pointerCache.find(pointer => pointer.pointerId === e.pointerId)) {
         pointerCache.push(e);
@@ -664,7 +668,7 @@ function onPointerDown(e) {
 }
 
 function onPointerMove(e) {
-    logger.log("pointerMove", e);
+    // logger.log("onPointerMove", e);
 
     // Update pointerCache
     for (let i = 0; i < pointerCache.length; i++) {
