@@ -94,7 +94,6 @@ const opts = {
     path: null,         // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
     ext: 'jpg',         // the file extension of the files, e.g. "?ext=png" if you have .png files
     bg: '999999',       // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
-    nomouse: false,     // DEBUG ONLY: don't handle mouse events
     debug: false,       // DEBUG ONLY: active debug mode
 }
 
@@ -647,10 +646,17 @@ function onPointerDown(e) {
     }
 
     if (pointerCache.length === 2) {
-        // initialize zoom/move with 2 fingers
+        // initialize zoom with 2 pointers
         pinch.initialPerspectiveAngle = perspectiveAngle;
         pinch.initialDistance = getDistance(pointerCache[0], pointerCache[1]);
         pinch.initialCenter = getCenter(pointerCache[0], pointerCache[1]);
+
+        // initialize move with 2 pointers
+        dragMode = enmDragMode.move;
+        const center = getCenter(pointerCache[0], pointerCache[1]);
+
+        old_x = center.x;
+        old_y = center.y;
     }
     
     e.preventDefault();
@@ -659,9 +665,6 @@ function onPointerDown(e) {
 
 function onPointerMove(e) {
     logger.log("pointerMove", e);
-
-    // pointerCache.length === 2 -> pinchZoom or 2-finger move
-    // pointerCache.length === 1, ev.buttons -> rotate or move
 
     // Update pointerCache
     for (let i = 0; i < pointerCache.length; i++) {
@@ -681,8 +684,8 @@ function onPointerMove(e) {
         }
     }
 
-    // If two pointers are down, check for pinch gestures
     if (pointerCache.length === 2) {
+        // pinch zoom
         const distance = getDistance(pointerCache[0], pointerCache[1]);
 
         const diff = pinch.initialDistance - distance;
@@ -691,6 +694,10 @@ function onPointerMove(e) {
         
         if (perspectiveAngle < 44) perspectiveAngle = 44;
         if (perspectiveAngle > 46) perspectiveAngle = 46;
+
+        // 2 pointers move
+        const center = getCenter(pointerCache[0], pointerCache[1]);
+        move({ pageX: center.x, pageY: center.y });
     }
 
     e.preventDefault();
@@ -755,9 +762,7 @@ function webGLStart() {
 
     window.addEventListener('resizeCanvas', canvas, false);
 
-    if (!opts.nomouse) {
-        canvas.addEventListener('wheel', mouseWheel, false);
-    }
+    canvas.addEventListener('wheel', mouseWheel, false);
 
     window.addEventListener('keydown', keyDown, false);
 
@@ -836,7 +841,6 @@ function init() {
     opts.path = getQueryVariable("path") || opts.path;
     opts.ext = getQueryVariable("ext") || opts.ext;
     opts.bg = '#' + (getQueryVariable("bg") || opts.bg);
-    opts.nomouse = getQueryVariable("nomouse") || opts.nomouse;
     opts.debug = getQueryVariable("debug") || opts.debug;
 
     const canvas = document.getElementById("glcanvas");
