@@ -55,3 +55,22 @@ Move: use <kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> or cursor keys
 Scan the front and back of the box as if you would scan a letter or document.
 
 Scan the other sides (top, bottom, left and right) while the front of the box is facing towards you while operating the scanner.
+
+## Supported Browsers
+
+Big Box 3D has been tested with the following browsers, see below. The tests have been performed with the examples from the Demo Site <https://themk2k.github.io/bigbox3d/>.
+
+Platform|Browser|Notes
+-|-|-
+Windows 10|Firefox 84|OK
+Windows 10|Chrome 87|OK - main development environment
+Windows 10|Edge 44|OK
+Linux Mint 19.3|Firefox 84|OK
+Linux Mint 19.3|Chromium 87|`*` may encounter memory issues, see below
+macOS 10.14|Firefox 84|OK
+macOS 10.14|Chrome 87|OK
+macOS 10.14|Safari 12.1.2|doesn't recognize pointer events (rotate, move)
+Android|Firefox 84|OK
+Android|Chrome 87|`*` may encounter memory issues, see below
+
+`*` Browsers which encounter memory issues won't load some textures and result in displaying a box with some or all of the sides being black. The error encountered here is `GL_OUT_OF_MEMORY`. Using images with lower resolution may mitigate the problem.
