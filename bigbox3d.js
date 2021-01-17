@@ -842,9 +842,15 @@ function hexToRgb(hex) {
 
 function init() {
     opts.name = getQueryVariable("name") || opts.name;
+    opts.name = opts.name.replace(/%2F/g, '/').replace(/%2520/g, ' ').replace(/\+/g, ' ');
+    
     opts.path = getQueryVariable("path") || opts.path;
+    opts.path = opts.path.replace(/%2F/g, '/').replace(/%2520/g, ' ').replace(/\+/g, ' ');
+
     opts.ext = getQueryVariable("ext") || opts.ext;
+    
     opts.bg = '#' + (getQueryVariable("bg") || opts.bg);
+    
     opts.debug = getQueryVariable("debug") || opts.debug;
 
     const canvas = document.getElementById("glcanvas");
@@ -852,6 +858,47 @@ function init() {
     canvas.style.backgroundColor = opts.bg;
 
     logger.log('opts:', opts);
+
+    initMeta();
+}
+
+function initMeta() {
+    const elements = document.getElementsByTagName("meta");
+
+    logger.log('meta elements:', elements);
+
+    for (let i = 0; i < elements.length; i++) {
+        const element = elements[i];
+
+        if (findAttribute(element.attributes, attrib => attrib.value === 'og:title')) {
+            // manipulate the title here
+        }
+        if (findAttribute(element.attributes, attrib => attrib.value === 'og:description')) {
+            // manipulate the description here
+        }
+        if (findAttribute(element.attributes, attrib => attrib.value === 'og:image')) {
+            // manipulate the image here
+            const contentAttribute = findAttribute(element.attributes, attrib => attrib.name === 'content');
+            
+            if (contentAttribute) {
+                const baseFullPath = (opts.path || '') + opts.name;
+                const imagePath = baseFullPath + 'front.' + opts.ext;
+                contentAttribute.nodeValue = imagePath;
+                contentAttribute.textContent = imagePath;
+                contentAttribute.value = imagePath;
+            }
+        }
+    }
+}
+
+function findAttribute(attributes, checkFunction) {
+    for (let i = 0; i < attributes.length; i++) {
+        if (checkFunction(attributes[i])) {
+            return attributes[i];
+        }
+    }
+
+    return null;
 }
 
 init();
