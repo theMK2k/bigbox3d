@@ -285,6 +285,10 @@ function initTexture(sFilename, textures) {
 
         if (allTexturesLoaded) {
             logger.log('all textures loaded!');
+
+            // remove "loading" div
+            const elem = document.getElementById('loading');
+            elem.remove();
         }
     }
     textures[anz].image.src = sFilename;
@@ -857,48 +861,11 @@ function init() {
 
     canvas.style.backgroundColor = opts.bg;
 
+    const loading = document.getElementById("loading");
+
+    loading.style.backgroundColor = opts.bg;
+
     logger.log('opts:', opts);
-
-    initMeta();
-}
-
-function initMeta() {
-    const elements = document.getElementsByTagName("meta");
-
-    logger.log('meta elements:', elements);
-
-    for (let i = 0; i < elements.length; i++) {
-        const element = elements[i];
-
-        if (findAttribute(element.attributes, attrib => attrib.value === 'og:title')) {
-            // manipulate the title here
-        }
-        if (findAttribute(element.attributes, attrib => attrib.value === 'og:description')) {
-            // manipulate the description here
-        }
-        if (findAttribute(element.attributes, attrib => attrib.value === 'og:image')) {
-            // manipulate the image here
-            const contentAttribute = findAttribute(element.attributes, attrib => attrib.name === 'content');
-            
-            if (contentAttribute) {
-                const baseFullPath = (opts.path || '') + opts.name;
-                const imagePath = baseFullPath + 'front.' + opts.ext;
-                contentAttribute.nodeValue = imagePath;
-                contentAttribute.textContent = imagePath;
-                contentAttribute.value = imagePath;
-            }
-        }
-    }
-}
-
-function findAttribute(attributes, checkFunction) {
-    for (let i = 0; i < attributes.length; i++) {
-        if (checkFunction(attributes[i])) {
-            return attributes[i];
-        }
-    }
-
-    return null;
 }
 
 init();
