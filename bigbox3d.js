@@ -849,7 +849,7 @@ function init() {
     opts.name = opts.name.replace(/%2F/g, '/').replace(/%2520/g, ' ').replace(/\+/g, ' ');
     
     opts.path = getQueryVariable("path") || opts.path;
-    opts.path = opts.path.replace(/%2F/g, '/').replace(/%2520/g, ' ').replace(/\+/g, ' ');
+    opts.path = opts.path ? opts.path.replace(/%2F/g, '/').replace(/%2520/g, ' ').replace(/\+/g, ' ') : null;
 
     opts.ext = getQueryVariable("ext") || opts.ext;
     
