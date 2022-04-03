@@ -30,7 +30,7 @@ try {
     $dynamicContent->removeChild($oldScript);
     $dynamicContent->appendChild($script);
 
-    $previewPath = $opts->path . $opts->name . "preview." . $opts->ext;
+    $previewPath = $config["host"] . $opts->path . $opts->name . "preview." . $opts->ext;
     
     $title = str_replace("_", " ", $opts->name);
     $lastChar = substr($title, -1);

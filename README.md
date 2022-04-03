@@ -10,7 +10,7 @@ Get the latest release at <https://github.com/theMK2k/bigbox3d/releases>.
 
 Place the contents of the .zip file in your web directory.
 
-Make sure you have 6 image files for each box according to each side of the box:
+Make sure you have 7 image files for each box according to each side of the box:
 
 - gamename-front.ext
 - gamename-back.ext
@@ -18,6 +18,7 @@ Make sure you have 6 image files for each box according to each side of the box:
 - gamename-bottom.ext
 - gamename-left.ext
 - gamename-right.ext
+- gamename-preview.ext
 
 bigbox3d.html accepts the following URL parameters:
 
@@ -27,6 +28,13 @@ name|the base name of the image files|`template-`|`?name=gamename-`, `?name=Ulti
 path|base path to files|`null`|`?path=/img/` if files are in "img" sub-directory
 ext|the file extension of the files|`jpg`|`?ext=png` if you have .png files
 bg|the background color, **IMPORTANT**: always use 6 hex characters!|`999999`|`?bg=ffffff` if you want a white background
+
+## Extended Usage
+
+You can extend the usage by utilizing bigbox3d.php which will:
+
+- load config from bigbox3d.config.json so you can omit URL parameters like path, ext and bg
+- provide specific meta tags (og:title, og:image, twitter:image)
 
 ## Controls inside the view
 
