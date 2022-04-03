@@ -1,0 +1,6 @@
+{
+    "host": "https://your.url.here",
+    "path": "/your/path/to/images/here/",
+    "ext": "jpg",
+    "bg": "000000"
+}

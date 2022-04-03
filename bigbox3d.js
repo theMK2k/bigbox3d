@@ -987,20 +987,22 @@ function hexToRgb(hex) {
 }
 
 function init() {
+  logger.log('config:', config);
+  
   opts.name = getQueryVariable("name") || opts.name;
   opts.name = opts.name
     .replace(/%2F/g, "/")
     .replace(/%2520/g, " ")
     .replace(/\+/g, " ");
 
-  opts.path = getQueryVariable("path") || opts.path;
+  opts.path = getQueryVariable("path") || config.path || opts.path;
   opts.path = opts.path
     ? opts.path.replace(/%2F/g, "/").replace(/%2520/g, " ").replace(/\+/g, " ")
     : null;
 
-  opts.ext = getQueryVariable("ext") || opts.ext;
+  opts.ext = getQueryVariable("ext") || config.ext || opts.ext;
 
-  opts.bg = "#" + (getQueryVariable("bg") || opts.bg);
+  opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
   opts.bgInverse = invertColor(opts.bg, true);
   document.getElementById("loading").style.color = opts.bgInverse;
   document.getElementById("loading").style.background = opts.bg;
