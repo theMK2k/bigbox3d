@@ -34,7 +34,7 @@ bg|the background color, **IMPORTANT**: always use 6 hex characters!|`999999`|`?
 You can extend the usage by utilizing bigbox3d.php which will:
 
 - load config from bigbox3d.config.json so you can omit URL parameters like path, ext and bg
-- provide specific meta tags (og:title, og:image, twitter:image)
+- provide specific meta tags (og:title, og:image, twitter:image) defined by the name URL parameter
 
 ## Controls inside the view
 

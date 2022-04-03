@@ -7,6 +7,8 @@ npx babel bigbox3d.js --presets es2015 -o bigbox3d-babel.js
 npx uglify-js ./bigbox3d-babel.js --output ./RELEASE/bigbox3d/bigbox3d.js
 rm bigbox3d-babel.js
 cp ./bigbox3d.html ./RELEASE/bigbox3d/bigbox3d.html
+cp ./bigbox3d.php ./RELEASE/bigbox3d/bigbox3d.php
+cp ./bigbox3d.config.json.example ./RELEASE/bigbox3d/bigbox3d.config.json.example
 cp ./template* ./RELEASE/bigbox3d/
 cp ./README.md ./RELEASE/bigbox3d/README.md
 cp ./LICENSE.md ./RELEASE/bigbox3d/LICENSE.md
