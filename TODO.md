@@ -1,9 +1,6 @@
 # TODO
 
-## v1.3.0
-
-- loading message/animation´
-- social meta (og:image)
+- test facebook link (modified after post) on the php implementation
 
 ## Other
 
