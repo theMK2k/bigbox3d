@@ -1,5 +1,9 @@
 # DONE
 
+## v1.4.0
+
+- show loading counter, e.g. "loading... (3 / 6)"
+
 ## v1.3.0
 
 - extended functionality with bigbox3d.php

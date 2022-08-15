@@ -327,6 +327,9 @@ function initTexture(sFilename, textures) {
       }
     });
 
+    document.getElementById("loading-counter").innerText =
+      textures.filter((tex) => tex.isLoaded).length + 1;
+
     if (allTexturesLoaded) {
       logger.log("all textures loaded!");
 
@@ -941,6 +944,8 @@ function webGLStart() {
 
   const baseFullPath = (opts.path || "") + opts.name;
 
+  document.getElementById("loading-total").innerText = "6";
+
   initTexture(baseFullPath + "front." + opts.ext, texturen);
   initTexture(baseFullPath + "back." + opts.ext, texturen);
   initTexture(baseFullPath + "top." + opts.ext, texturen);
@@ -987,8 +992,8 @@ function hexToRgb(hex) {
 }
 
 function init() {
-  logger.log('config:', config);
-  
+  logger.log("config:", config);
+
   opts.name = getQueryVariable("name") || opts.name;
   opts.name = opts.name
     .replace(/%2F/g, "/")
