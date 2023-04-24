@@ -1,25 +1,31 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <meta name="viewport" content="user-scalable=no" />
-
-    <!-- Opengraph Tags (Facebook) -->
-    <meta property="og:title" content="Click here to view in interactive 3D" />
-    <meta property="og:image" />
-    <meta property="og:type" content="website" />
-
-    <!-- Twitter Tags -->
-    <meta name="twitter:card" content="summary" />
-    <meta name="twitter:image" /> 
-  </head>
-
   <body style="margin: 0px; overflow: hidden" oncontextmenu="return false;">
     <div id="dynamic-data">
-      <script id="config">const config = {}</script>
+      <script id="config">
+        /*
+          ###################
+          ## YOUR DEFAULTS ##
+          ###################
+          
+          If you use bigbox3d.php, you don't have to touch anything in here. Because bigbox3d.php utilizes bigbox3d.config.json
+          If you don't use bigbox3d.php you can set your defaults below. Create a backup before updating BigBox3D - because bigbox3d.html will be overwritten!
+
+        */
+        const config = {
+          // path: "/bigbox3d/",                                                      // base path to files, e.g. "/bigbox3d/img/" if files are in "/bigbox3d/img/" sub-directory
+          // ext: "jpg",                                                              // the file extension of the box texture files, e.g. "png" if you use .png files
+          // usevignette: true,                                                       // use a vignette effect for the background
+          // bgext: "gif",                                                            // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "gif" if you have .gif background files
+          // bg: "000000",                                                            // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+          // extlink2: "https://github.com/theMK2k/bigbox3d",                         // an external link to be displayed in the bottom left corner
+          // extlink2_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link
+        };
+      </script>
     </div>
 
     <script src="gl-matrix-min.js"></script>
+
     <script id="shader-fs" type="x-shader/x-fragment">
       precision mediump float;
 
@@ -50,22 +56,124 @@
 
     <div id="debug" style="height: 1000"></div>
 
-    <div id="loading" style="color: #ffffff; text-align: center">
-      loading... (<span id="loading-counter">1</span> / <span id="loading-total">6</span>)
+    <div id="gldiv">
+      <canvas id="glcanvas"> </canvas>
     </div>
 
-    <canvas
-      id="glcanvas"
-      style="
-        border: none;
-        cursor: pointer;
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-      "
-    >
-    </canvas>
+    <div id="loading">
+      loading... (<span id="loading-counter">0</span> /
+      <span id="loading-total">6</span>)
+    </div>
+
+    <a
+      id="extlink"
+      title="Open exclusively in a new tab"
+      href=""
+      target="_blank"
+    ></a>
+
+    <div id="extlink2"><a id="extlink2_a" href="" target="_blank"></a></div>
 
     <script src="bigbox3d.js"></script>
   </body>
+  
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="user-scalable=no" />
+
+    <!-- Opengraph Tags (Facebook) -->
+    <meta property="og:title" content="Click here to view in interactive 3D" />
+    <meta property="og:image" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Tags -->
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:image" />
+  </head>
+
+  <style>
+    * {
+      font-family: "Roboto", sans-serif;
+    }
+
+    #gldiv {
+      position: absolute;
+      top: 0em;
+      bottom: 0em;
+      left: 0em;
+      right: 0em;
+      overflow: hidden;
+      z-index: 1;
+      transition-timing-function: ease;
+      transition: opacity 0.5s;
+      opacity: 0;
+    }
+
+    #glcanvas {
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    #loading {
+      position: absolute;
+      opacity: 1;
+      width: 100%;
+      margin-top: 0.5em;
+      color: #ffffff;
+      text-align: center;
+      text-shadow: 0 0 2px #000;
+      font-size: 12px;
+      z-index: 3;
+      transition-timing-function: ease;
+      transition: opacity 0.5s;
+    }
+
+    #extlink2 {
+      position: absolute;
+      bottom: 0.3em;
+      left: 0.5em;
+      text-align: left;
+      font-size: 10px;
+      z-index: 4;
+      color: #fff;
+      text-shadow: 0 0 2px #000;
+      opacity: 0.5;
+      transition: opacity 0.5s;
+    }
+
+    #extlink2 a {
+      color: #fff;
+      text-decoration: none;
+    }
+
+    #extlink2:hover {
+      opacity: 1;
+    }
+
+    #extlink {
+      display: none;
+      cursor: pointer;
+      position: absolute;
+      top: 0.5em;
+      right: 0.5em;
+      text-decoration: none;
+      background-image: url(extlink.png);
+      background-position: 50% 50%;
+      background-size: 100% 100%;
+      background-repeat: no-repeat;
+      opacity: 0.5;
+      transition: opacity 0.5s;
+      width: 1.2em;
+      height: 1.2em;
+      z-index: 4;
+    }
+
+    #extlink:hover {
+      opacity: 1;
+    }
+  </style>
 </html>

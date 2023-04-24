@@ -1,10 +1,151 @@
 /**
- * BIG BOX 3D v1.0.0
- * ©2020 Jörg "MK2k" Sonntag
+ * BIG BOX 3D v1.4.0
+ * ©2023 Jörg "MK2k" Sonntag
  */
 
+
+// #region Options
+/* 
+  ###################
+  ##    OPTIONS    ##
+  ###################
+  
+  IMPORTANT: don't touch these
+  
+  They will be overwritten by:
+  - the query string parameters with the same name
+  - bigbox3d.config.json (if bigbox3d.php is used)
+  - config Object defined in bigbox3d.html
+
+  whatever comes first.
+*/
+const opts = {
+  name: "template-", // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
+  path: null, // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
+  ext: "jpg", // the file extension of the box texture files, e.g. "?ext=png" if you have .png files
+  usevignette: true, // use a vignette effect for the background
+  bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "?bgext=gif" if you have .gif background file
+  bg: "000000", // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+  debug: false, // DEBUG ONLY: activate debug mode
+};
+// #endregion Options
+
+// #region Variables and Enums
+/* 
+  ###############################
+  ##    VARIABLES AND ENUMS    ##
+  ###############################
+*/
+let basePath = "";
+
+let gl;
+
+const tex_front = 0;
+const tex_back = 1;
+const tex_top = 2;
+const tex_bottom = 3;
+const tex_right = 4;
+const tex_left = 5;
+
+let extAnisotropic = null;
+
+const enmFaces = {
+  front: 0,
+  back: 1,
+  top: 2,
+  bottom: 3,
+  right: 4,
+  left: 5,
+};
+
+const dimensions = {
+  width: 1,
+  height: 1,
+  depth: 1,
+};
+
+let zoom = 1.4;
+
+let dimensionsCalculated = false;
+
+let shaderProgram;
+
+let allTexturesLoaded = false;
+const texturen = new Array();
+
+let allLoaded = false;
+
+let mvMatrix = mat4.create();
+const mvMatrixStack = [];
+const pMatrix = mat4.create();
+
+let vertBuffer = null;
+let coordBuffer = null;
+let IndexBuffer = null;
+
+let xRot = 0;
+let yRot = 0;
+let zRot = 0;
+
+let lastTime = 0;
+
+let THETA = 0;
+let PHI = 0;
+
+// #endregion Variables and Enums
+
+// #region Helper Functions
+/*
+  ############################
+  ##    HELPER FUNCTIONS    ##
+  ############################
+*/
+function isNumeric(str) {
+  if (typeof str != "string") return false;
+  return !isNaN(str) && !isNaN(parseFloat(str));
+}
+
+function getQueryVariable(variable) {
+  const query = window.location.search.substring(1);
+  const vars = query.split("&");
+  for (let i = 0; i < vars.length; i++) {
+    const pair = vars[i].split("=");
+    if (pair[0] == variable) {
+      return pair[1];
+    }
+  }
+  return null;
+}
+
+function hexToRgb(hex) {
+  const matches = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+
+  const rgb = matches
+    ? {
+        r: parseInt(matches[1], 16),
+        g: parseInt(matches[2], 16),
+        b: parseInt(matches[3], 16),
+      }
+    : null;
+
+  logger.log("hexToRgb result:", rgb);
+
+  return rgb;
+}
+
+function hasValue(value) {
+  return value !== null && value !== undefined && value !== "";
+}
+// #endregion Helper Functions
+
 // #region Logger
-// Our own logging implementation with loglevel definition
+/*
+  ##################
+  ##    LOGGER    ##
+  ##################
+
+  Our own logging implementation with loglevel definition
+*/
 const enmLogLevels = {
   TRACE: 0,
   DEBUG: 1,
@@ -92,51 +233,12 @@ console.info(
 
 // #endregion Logger
 
-const opts = {
-  name: "template-", // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
-  path: null, // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
-  ext: "jpg", // the file extension of the files, e.g. "?ext=png" if you have .png files
-  bg: "000000", // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
-  debug: false, // DEBUG ONLY: active debug mode
-};
-
-let basePath = "";
-
-let gl;
-
-const tex_front = 0;
-const tex_back = 1;
-const tex_top = 2;
-const tex_bottom = 3;
-const tex_right = 4;
-const tex_left = 5;
-
-let extAnisotropic = null;
-
-const enmFaces = {
-  front: 0,
-  back: 1,
-  top: 2,
-  bottom: 3,
-  right: 4,
-  left: 5,
-};
-
-const dimensions = {
-  width: 1,
-  height: 1,
-  depth: 1,
-};
-
-let zoom = 1.4;
-
-function isNumeric(str) {
-  if (typeof str != "string") return false;
-  return !isNaN(str) && !isNaN(parseFloat(str));
-}
-
-let dimensionsCalculated = false;
-
+// #region WebGL
+/*
+  #################
+  ##    WEBGL    ##
+  #################
+*/
 function calculateDimensions() {
   if (dimensionsCalculated) {
     return;
@@ -230,8 +332,6 @@ function getShader(gl, id) {
   return shader;
 }
 
-let shaderProgram;
-
 function initShaders() {
   const fragmentShader = getShader(gl, "shader-fs");
   const vertexShader = getShader(gl, "shader-vs");
@@ -275,9 +375,6 @@ function initShaders() {
     "uSampler"
   );
 }
-
-const texturen = new Array();
-let allTexturesLoaded = false;
 
 function initTexture(sFilename, textures) {
   const anz = textures.length;
@@ -327,23 +424,19 @@ function initTexture(sFilename, textures) {
       }
     });
 
-    document.getElementById("loading-counter").innerText =
-      textures.filter((tex) => tex.isLoaded).length + 1;
+    document.getElementById("loading-counter").innerText = textures.filter(
+      (tex) => tex.isLoaded
+    ).length;
 
     if (allTexturesLoaded) {
       logger.log("all textures loaded!");
 
-      // remove "loading" div
-      const elem = document.getElementById("loading");
-      elem.remove();
+      // fade-out "loading" div
+      document.getElementById("loading").style.opacity = 0;
     }
   };
   textures[anz].image.src = sFilename;
 }
-
-let mvMatrix = mat4.create();
-const mvMatrixStack = [];
-const pMatrix = mat4.create();
 
 function mvPushMatrix() {
   const copy = mat4.create();
@@ -366,10 +459,6 @@ function setMatrixUniforms() {
 function degToRad(degrees) {
   return (degrees * Math.PI) / 180;
 }
-
-let vertBuffer = null;
-let coordBuffer = null;
-let IndexBuffer = null;
 
 function initBuffers() {
   logger.log("initializing buffers");
@@ -546,10 +635,6 @@ function initBuffers() {
   IndexBuffer.numItems = 36;
 }
 
-let xRot = 0;
-let yRot = 0;
-let zRot = 0;
-
 function drawScene() {
   if (!allTexturesLoaded) {
     // TODO: idle animation?
@@ -629,11 +714,6 @@ function drawScene() {
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 60);
 }
 
-let lastTime = 0;
-
-let THETA = 0;
-let PHI = 0;
-
 function animate() {
   if (!allTexturesLoaded) return;
 
@@ -660,16 +740,20 @@ function redraw() {
   drawScene();
   animate();
 }
+// #endregion WebGL
 
-// Mousedrag rotation with amortization
-// https://www.tutorialspoint.com/webgl/webgl_interactive_cube.htm
+// #region Mouse and Touch Handling
+/*
+  ####################################
+  ##    MOUSE AND TOUCH HANDLING    ##
+  ####################################
+*/
+// Mousedrag rotation with amortization https://www.tutorialspoint.com/webgl/webgl_interactive_cube.htm
 const enmDragMode = {
   none: 0,
   rotate: 1,
   move: 2,
 };
-
-/*================= Mouse events ======================*/
 
 const AMORTIZATION = 0.91;
 let dragMode = enmDragMode.none;
@@ -745,7 +829,6 @@ const keyDown = function (event) {
   //event.preventDefault();
 };
 
-/* TOUCH */
 const pointerCache = new Array();
 const pinch = {
   initialPerspectiveAngle: null, // float; the perspective Angle when the second pointer is added
@@ -867,41 +950,14 @@ function onPointerUp(e) {
   e.preventDefault();
   return false;
 }
+// #endregion Mouse and Touch Handling
 
-/*=========================rotation================*/
-
-function rotateX(m, angle) {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  const mv1 = m[1],
-    mv5 = m[5],
-    mv9 = m[9];
-
-  m[1] = m[1] * c - m[2] * s;
-  m[5] = m[5] * c - m[6] * s;
-  m[9] = m[9] * c - m[10] * s;
-
-  m[2] = m[2] * c + mv1 * s;
-  m[6] = m[6] * c + mv5 * s;
-  m[10] = m[10] * c + mv9 * s;
-}
-
-function rotateY(m, angle) {
-  const c = Math.cos(angle);
-  const s = Math.sin(angle);
-  const mv0 = m[0],
-    mv4 = m[4],
-    mv8 = m[8];
-
-  m[0] = c * m[0] + s * m[2];
-  m[4] = c * m[4] + s * m[6];
-  m[8] = c * m[8] + s * m[10];
-
-  m[2] = c * m[2] - s * mv0;
-  m[6] = c * m[6] - s * mv4;
-  m[10] = c * m[10] - s * mv8;
-}
-
+// #region Main
+/*
+  ################
+  ##    MAIN    ##
+  ################
+*/
 const canvas = document.querySelector("#glcanvas");
 
 function webGLStart() {
@@ -944,6 +1000,18 @@ function webGLStart() {
 
   const baseFullPath = (opts.path || "") + opts.name;
 
+  // Background Image (inspired by http://bigboxcollection.com/)
+  bgimgFetch(baseFullPath + "bg." + (opts.bgext || opts.ext));
+
+  if (
+    opts.usevignette === "true" ||
+    opts.usevignette === true ||
+    opts.usevignette == 1
+  ) {
+    document.getElementById("glcanvas").style.boxShadow =
+      "inset 0 2px 10em 2px rgba(0, 0, 0, 0.8)";
+  }
+
   document.getElementById("loading-total").innerText = "6";
 
   initTexture(baseFullPath + "front." + opts.ext, texturen);
@@ -953,46 +1021,20 @@ function webGLStart() {
   initTexture(baseFullPath + "right." + opts.ext, texturen);
   initTexture(baseFullPath + "left." + opts.ext, texturen);
 
-  gl.clearColor(
-    hexToRgb(opts.bg).r / 255,
-    hexToRgb(opts.bg).g / 255,
-    hexToRgb(opts.bg).b / 255,
-    1.0
-  );
+  // gl.clearColor(
+  //   hexToRgb(opts.bg).r / 255,
+  //   hexToRgb(opts.bg).g / 255,
+  //   hexToRgb(opts.bg).b / 255,
+  //   1.0
+  // );
   gl.enable(gl.DEPTH_TEST);
   redraw();
 }
 
-function getQueryVariable(variable) {
-  const query = window.location.search.substring(1);
-  const vars = query.split("&");
-  for (let i = 0; i < vars.length; i++) {
-    const pair = vars[i].split("=");
-    if (pair[0] == variable) {
-      return pair[1];
-    }
-  }
-  return false;
-}
-
-function hexToRgb(hex) {
-  const matches = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-
-  const rgb = matches
-    ? {
-        r: parseInt(matches[1], 16),
-        g: parseInt(matches[2], 16),
-        b: parseInt(matches[3], 16),
-      }
-    : null;
-
-  logger.log("hexToRgb result:", rgb);
-
-  return rgb;
-}
-
 function init() {
   logger.log("config:", config);
+
+  document.getElementById("gldiv").style.opacity = "1";
 
   opts.name = getQueryVariable("name") || opts.name;
   opts.name = opts.name
@@ -1006,51 +1048,64 @@ function init() {
     : null;
 
   opts.ext = getQueryVariable("ext") || config.ext || opts.ext;
+  opts.bgext = getQueryVariable("bgext") || config.bgext || opts.bgext;
+
+  opts.usevignette = hasValue(getQueryVariable("usevignette"))
+    ? getQueryVariable("usevignette")
+    : hasValue(config.usevignette)
+    ? config.usevignette
+    : opts.usevignette;
 
   opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
-  opts.bgInverse = invertColor(opts.bg, true);
-  document.getElementById("loading").style.color = opts.bgInverse;
-  document.getElementById("loading").style.background = opts.bg;
 
   opts.debug = getQueryVariable("debug") || opts.debug;
 
   const canvas = document.getElementById("glcanvas");
-
   canvas.style.backgroundColor = opts.bg;
 
-  const loading = document.getElementById("loading");
-
-  loading.style.backgroundColor = opts.bg;
-
   logger.log("opts:", opts);
+
+  if (self !== top) {
+    // The current window is nested within an <iframe> or <object>.
+    logger.log("embedding detected");
+    document.getElementById("extlink").style.display = "block";
+  } else {
+    logger.log("no embedding detected");
+  }
+
+  if (config.extlink2 && config.extlink2_innerhtml) {
+    document.getElementById("extlink2_a").href = config.extlink2;
+    document.getElementById("extlink2_a").innerHTML = config.extlink2_innerhtml;
+  }
 }
 
-function invertColor(hex, bw) {
-  if (hex.indexOf("#") === 0) {
-    hex = hex.slice(1);
-  }
-  // convert 3-digit hex to 6-digits.
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-  if (hex.length !== 6) {
-    throw new Error("Invalid HEX color.");
-  }
-  var r = parseInt(hex.slice(0, 2), 16),
-    g = parseInt(hex.slice(2, 4), 16),
-    b = parseInt(hex.slice(4, 6), 16);
-  if (bw) {
-    // https://stackoverflow.com/a/3943023/112731
-    return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? "#000000" : "#FFFFFF";
-  }
-  // invert color components
-  r = (255 - r).toString(16);
-  g = (255 - g).toString(16);
-  b = (255 - b).toString(16);
-  // pad each with zeros and return
-  return "#" + padZero(r) + padZero(g) + padZero(b);
+function bgimgFetch(url) {
+  fetch(url, {
+    method: "GET",
+  })
+    .then((response) => {
+      logger.log("bgimgFetch response:", response);
+      if (response.status !== 200) {
+        return;
+      }
+      return response.blob();
+    })
+    .then((data) => {
+      if (!data) return;
+      const bgimgURL = URL.createObjectURL(data);
+      document.getElementById("glcanvas").style.backgroundSize =
+        "auto, 100% 100%";
+      document.getElementById("glcanvas").style.backgroundPosition =
+        "0% 0%, 50% 50%";
+      document.getElementById("glcanvas").style.backgroundImage =
+        "url('bg-pattern.png'), url('" + bgimgURL + "')";
+    })
+    .catch((error) => {
+      logger.error(error);
+    });
 }
 
 init();
 
 webGLStart();
+// #endregion Main

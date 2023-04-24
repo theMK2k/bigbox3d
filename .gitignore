@@ -1,3 +1,5 @@
 node_modules
 RELEASE*
-bigbox3d.config.json
+!bigbox3d.config.json.example
+bigbox3d.config.*.json
+samples

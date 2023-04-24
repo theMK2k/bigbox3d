@@ -3,8 +3,9 @@
  * bigbox3d.php
  * 
  * While using bigbox3d.html on its own is perfectly fine,
- * bigbox3d.php enhanced the experience by providing proper
- * og:image and og:title meta tags which provide 
+ * bigbox3d.php enhances the experience by providing proper
+ * og:image and og:title meta tags which provide a better
+ * experience when sharing the link on social media.
  */
 
 $document = new DOMDocument();
