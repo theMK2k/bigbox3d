@@ -1,4 +1,4 @@
-Big Box 3D Copyright 2020 Jörg "MK2k" Sonntag
+Big Box 3D Copyright 2023 Jörg "MK2k" Sonntag
 
 Hippocratic License Version Number: 2.1.
 
