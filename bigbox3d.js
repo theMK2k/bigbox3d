@@ -3,7 +3,6 @@
  * ©2023 Jörg "MK2k" Sonntag
  */
 
-
 // #region Options
 /* 
   ###################
@@ -20,12 +19,17 @@
   whatever comes first.
 */
 const opts = {
+  // Options also available via bigbox3d.config.json and as URL parameters
   name: "template-", // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
   path: null, // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
   ext: "jpg", // the file extension of the box texture files, e.g. "?ext=png" if you have .png files
   usevignette: true, // use a vignette effect for the background
   bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "?bgext=gif" if you have .gif background file
   bg: "000000", // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+  bginterval: 10, // the interval in seconds to change the background image (applies if you have multiple background images)
+
+  // Options also available via bigbox3d.config.json
+  host: "", // the host to load the images from, e.g. "https://example.com" (please don't forget your server-side CORS settings!)
   debug: false, // DEBUG ONLY: activate debug mode
 };
 // #endregion Options
@@ -37,6 +41,13 @@ const opts = {
   ###############################
 */
 let basePath = "";
+
+const bgimgData = {
+  cache: [], // stores virtual URLs of fetched images for each bgNum, e.g. 0: "blob:https://example.com/4a1769aa-d9cb-4a05-a540-51065bccce1c"
+  currentBgNum: 0,
+  maxBgNum: -1,
+  bgChangeInterval: null,
+};
 
 let gl;
 
@@ -91,7 +102,6 @@ let lastTime = 0;
 
 let THETA = 0;
 let PHI = 0;
-
 // #endregion Variables and Enums
 
 // #region Helper Functions
@@ -998,10 +1008,13 @@ function webGLStart() {
   initShaders();
   // initBuffers();
 
-  const baseFullPath = (opts.path || "") + opts.name;
+  const baseFullPath = (config.host || "") + (opts.path || "") + opts.name;
 
   // Background Image (inspired by http://bigboxcollection.com/)
-  bgimgFetch(baseFullPath + "bg." + (opts.bgext || opts.ext));
+  getNextBg(baseFullPath, opts.bgext || opts.ext);
+  bgimgData.bgChangeInterval = setInterval(() => {
+    getNextBg(baseFullPath, opts.bgext || opts.ext);
+  }, opts.bginterval * 1000);
 
   if (
     opts.usevignette === "true" ||
@@ -1021,12 +1034,12 @@ function webGLStart() {
   initTexture(baseFullPath + "right." + opts.ext, texturen);
   initTexture(baseFullPath + "left." + opts.ext, texturen);
 
-  // gl.clearColor(
-  //   hexToRgb(opts.bg).r / 255,
-  //   hexToRgb(opts.bg).g / 255,
-  //   hexToRgb(opts.bg).b / 255,
-  //   1.0
-  // );
+  gl.clearColor(
+    hexToRgb(opts.bg).r / 255,
+    hexToRgb(opts.bg).g / 255,
+    hexToRgb(opts.bg).b / 255,
+    0.0
+  );
   gl.enable(gl.DEPTH_TEST);
   redraw();
 }
@@ -1060,8 +1073,9 @@ function init() {
 
   opts.debug = getQueryVariable("debug") || opts.debug;
 
-  const canvas = document.getElementById("glcanvas");
-  canvas.style.backgroundColor = opts.bg;
+  document.getElementById("gldiv").style.backgroundColor = opts.bg;
+  document.getElementById("bg0").style.backgroundColor = opts.bg;
+  document.getElementById("bg1").style.backgroundColor = opts.bg;
 
   logger.log("opts:", opts);
 
@@ -1079,30 +1093,85 @@ function init() {
   }
 }
 
-function bgimgFetch(url) {
+function getNextBg(baseFullPath, ext) {
+  logger.log("[getNextBg] bgimgData.currentBgNum:", bgimgData.currentBgNum);
+
+  const url = baseFullPath + "bg" + bgimgData.currentBgNum + "." + ext;
+
+  if (bgimgData.maxBgNum !== -1 && bgimgData.currentBgNum > bgimgData.maxBgNum) {
+    bgimgData.currentBgNum = 0;
+  }
+
+  if (bgimgData.cache[bgimgData.currentBgNum]) {
+    applyBgImage(bgimgData.cache[bgimgData.currentBgNum]);
+    bgimgData.currentBgNum++;
+    return;
+  }
+
   fetch(url, {
     method: "GET",
   })
     .then((response) => {
       logger.log("bgimgFetch response:", response);
       if (response.status !== 200) {
-        return;
+        throw new Error("bgimgFetch failed with status " + response.status);
       }
       return response.blob();
     })
     .then((data) => {
       if (!data) return;
+
       const bgimgURL = URL.createObjectURL(data);
-      document.getElementById("glcanvas").style.backgroundSize =
-        "auto, 100% 100%";
-      document.getElementById("glcanvas").style.backgroundPosition =
-        "0% 0%, 50% 50%";
-      document.getElementById("glcanvas").style.backgroundImage =
-        "url('bg-pattern.png'), url('" + bgimgURL + "')";
+      bgimgData.cache[bgimgData.currentBgNum] = bgimgURL;
+      applyBgImage(bgimgURL);
+      bgimgData.currentBgNum++;
     })
     .catch((error) => {
-      logger.error(error);
+      logger.log(error);
+
+      if (bgimgData.currentBgNum === 0) {
+        // we couldn't even fetch the first image
+        clearInterval(bgimgData.bgChangeInterval);
+        return;
+      }
+
+      bgimgData.maxBgNum = bgimgData.currentBgNum - 1;
+
+      bgimgData.currentBgNum = 0;
+
+      applyBgImage(bgimgData.cache[0]);
+      bgimgData.currentBgNum++;
     });
+}
+
+function applyBgImage(bgimgURL) {
+  const currentBgDiv = "bg" + (bgimgData.currentBgNum % 2);
+  const otherBgDiv = "bg" + ((bgimgData.currentBgNum + 1) % 2);
+
+  logger.log(
+    "[applyBgImage] currentBgNum:",
+    bgimgData.currentBgNum,
+    "currentBgDiv:",
+    currentBgDiv,
+    "otherBgDiv:",
+    otherBgDiv
+  );
+
+  // document.getElementById("bg1").style.backgroundColor = "black"; // reset background color, else the image will be mixed with that color
+  // document.getElementById("bg2").style.backgroundColor = "black"; // reset background color, else the image will be mixed with that color
+  if (
+    document.getElementById(currentBgDiv).style.backgroundSize !==
+    "auto, 100% 100%"
+  ) {
+    document.getElementById(currentBgDiv).style.backgroundSize =
+      "auto, 100% 100%";
+    document.getElementById(currentBgDiv).style.backgroundPosition =
+      "0% 0%, 50% 50%";
+  }
+  document.getElementById(currentBgDiv).style.backgroundImage =
+    "url('bg-pattern.png'), url('" + bgimgURL + "')";
+  document.getElementById(otherBgDiv).style.opacity = 0;
+  document.getElementById(currentBgDiv).style.opacity = 1;
 }
 
 init();

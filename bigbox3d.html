@@ -13,11 +13,12 @@
 
         */
         const config = {
-          // path: "/bigbox3d/",                                                      // base path to files, e.g. "/bigbox3d/img/" if files are in "/bigbox3d/img/" sub-directory
-          // ext: "jpg",                                                              // the file extension of the box texture files, e.g. "png" if you use .png files
-          // usevignette: true,                                                       // use a vignette effect for the background
-          // bgext: "gif",                                                            // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "gif" if you have .gif background files
-          // bg: "000000",                                                            // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+          host: "",                                                                // the host of your images (typically the same host, bigbox3d.html resides at)
+          path: "/bigbox3d/img/",                                                  // base path to image files, e.g. "/bigbox3d/img/"
+          // ext: "jpg",                                                           // the file extension of the box texture files, e.g. "png" if you use .png files
+          // usevignette: true,                                                    // use a vignette effect for the background
+          // bgext: "gif",                                                         // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "gif" if you have .gif background files
+          bg: "000000",                                                            // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
           extlink2: "https://github.com/theMK2k/bigbox3d",                         // an external link to be displayed in the bottom left corner
           extlink2_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link
         };
@@ -58,6 +59,8 @@
 
     <div id="gldiv">
       <canvas id="glcanvas"> </canvas>
+      <div id="bg0"></div>
+      <div id="bg1"></div>
     </div>
 
     <div id="loading">
@@ -104,8 +107,27 @@
       right: 0em;
       overflow: hidden;
       z-index: 1;
-      transition-timing-function: ease;
       transition: opacity 0.5s;
+      opacity: 0;
+    }
+
+    #bg0 {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      transition: opacity 1s;
+      transition-timing-function: ease-in-out;
+      opacity: 1;
+    }
+
+    #bg1 {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      transition: opacity 1s;
+      transition-timing-function: ease-in-out;
       opacity: 0;
     }
 
@@ -116,6 +138,8 @@
       height: 100%;
       overflow: hidden;
       z-index: 2;
+      background-color: transparent;
+      position: absolute;
     }
 
     #loading {
