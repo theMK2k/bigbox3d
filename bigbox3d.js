@@ -442,8 +442,8 @@ function initTexture(sFilename, textures) {
     if (allTexturesLoaded) {
       logger.log("all textures loaded!");
 
-      // fade-out "loading" div
-      document.getElementById("loading").style.opacity = 0;
+      // TODO: fade-out
+      document.getElementById("loading").style.display = "none";
     }
   };
   textures[anz].image.src = sFilename;
