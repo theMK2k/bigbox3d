@@ -3,8 +3,9 @@
     "path": "/your/path/to/images/here/",
     "ext": "jpg",
     "bg": "000000",
-    "usevignette": true,
+    "bgvignette": true,
+    "bgpattern": true,
     "bgext": "gif",
-    "extlink2": "https://github.com/theMK2k/bigbox3d",
-    "extlink2_innerhtml": "sample of <b>Big Box 3D</b>"
+    "extlink": "https://github.com/theMK2k/bigbox3d",
+    "extlink_innerhtml": "sample of <b>Big Box 3D</b>"
 }

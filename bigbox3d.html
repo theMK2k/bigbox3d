@@ -13,14 +13,19 @@
 
         */
         const config = {
-          host: "",                                                                // the host of your images (typically the same host, bigbox3d.html resides at)
-          path: "/bigbox3d/img/",                                                  // base path to image files, e.g. "/bigbox3d/img/"
-          // ext: "jpg",                                                           // the file extension of the box texture files, e.g. "png" if you use .png files
-          // usevignette: true,                                                    // use a vignette effect for the background
-          // bgext: "gif",                                                         // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "gif" if you have .gif background files
-          bg: "000000",                                                            // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
-          extlink2: "https://github.com/theMK2k/bigbox3d",                         // an external link to be displayed in the bottom left corner
-          extlink2_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link
+          host: "", // the host of your images (typically the same host, bigbox3d.html resides at)
+          path: "/bigbox3d/img/", // base path to image files, e.g. "/bigbox3d/img/"
+          ext: "jpg", // the file extension of the box texture files, e.g. "png" if you use .png files
+          bg: "000000", // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+          bgvignette: true, // use a vignette effect for the background
+          bgpattern: true, // use a pattern effect for the background
+          bgext: "gif", // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g.
+          //   "?bgext=gif" if you have .gif background file
+          //   "?bgext=mp4" if you have a video file (for videos currently only mp4 is supported)
+          bginterval: 10, // the interval in seconds to change the background image (applies if you have multiple background images)
+          extlink: "https://github.com/theMK2k/bigbox3d", // an external link to be displayed in the bottom left corner
+          extlink_innerhtml:
+            "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link
         };
       </script>
     </div>
@@ -59,8 +64,12 @@
 
     <div id="gldiv">
       <canvas id="glcanvas"> </canvas>
+      <div id="bgfilter"></div>
       <div id="bg0"></div>
       <div id="bg1"></div>
+      <video id="bgvideo" autoplay muted loop>
+        <source id="bgvideosource" />
+      </video>
     </div>
 
     <div id="loading">
@@ -69,17 +78,25 @@
     </div>
 
     <a
-      id="extlink"
+      id="openexclusively"
       title="Open exclusively in a new tab"
       href=""
       target="_blank"
     ></a>
 
-    <div id="extlink2"><a id="extlink2_a" href="" target="_blank"></a></div>
+    <div id="extlink"><a id="extlink_a" href="" target="_blank"></a></div>
+
+    <div
+      id="bgvideocontrols"
+      title="Play/Pause the background video"
+      onclick="bgVideoPlayPause()"
+    >
+      play/pause
+    </div>
 
     <script src="bigbox3d.js"></script>
   </body>
-  
+
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="user-scalable=no" />
@@ -118,10 +135,33 @@
       z-index: 1;
       transition: opacity 1s;
       transition-timing-function: ease-in-out;
-      opacity: 1;
+      opacity: 0;
     }
 
     #bg1 {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 1;
+      transition: opacity 1s;
+      transition-timing-function: ease-in-out;
+      opacity: 0;
+    }
+
+    #bgfilter {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      z-index: 2;
+      transition: opacity 1s;
+      transition-timing-function: ease-in-out;
+      opacity: 0;
+      background-size: auto;
+      background-position: 0% 0%;
+      background-image: url("bg-pattern.png");
+    }
+
+    #bgvideo {
       width: 100%;
       height: 100%;
       position: absolute;
@@ -137,13 +177,16 @@
       width: 100%;
       height: 100%;
       overflow: hidden;
-      z-index: 2;
+      z-index: 3;
       background-color: transparent;
       position: absolute;
     }
 
     #loading {
       position: absolute;
+      top: 50%;
+      -ms-transform: translateY(-50%);
+      transform: translateY(-50%);
       opacity: 1;
       width: 100%;
       margin-top: 0.5em;
@@ -156,7 +199,7 @@
       transition: opacity 0.5s;
     }
 
-    #extlink2 {
+    #extlink {
       position: absolute;
       bottom: 0.3em;
       left: 0.5em;
@@ -169,23 +212,23 @@
       transition: opacity 0.5s;
     }
 
-    #extlink2 a {
+    #extlink a {
       color: #fff;
       text-decoration: none;
     }
 
-    #extlink2:hover {
+    #extlink:hover {
       opacity: 1;
     }
 
-    #extlink {
+    #openexclusively {
       display: none;
       cursor: pointer;
       position: absolute;
       top: 0.5em;
       right: 0.5em;
       text-decoration: none;
-      background-image: url(extlink.png);
+      background-image: url(openexclusively.png);
       background-position: 50% 50%;
       background-size: 100% 100%;
       background-repeat: no-repeat;
@@ -196,7 +239,26 @@
       z-index: 4;
     }
 
-    #extlink:hover {
+    #openexclusively:hover {
+      opacity: 1;
+    }
+
+    #bgvideocontrols {
+      display: none;
+      position: absolute;
+      bottom: 0.3em;
+      right: 0.5em;
+      text-align: right;
+      font-size: 16px;
+      z-index: 4;
+      color: #fff;
+      text-shadow: 0 0 2px #000;
+      cursor: pointer;
+      opacity: 0.5;
+      transition: opacity 0.5s;
+    }
+
+    #bgvideocontrols:hover {
       opacity: 1;
     }
   </style>

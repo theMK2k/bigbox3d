@@ -1,5 +1,24 @@
 # DONE
 
+## v1.5.0 (WIP)
+
+- bg image slideshow
+  -> investigate bg slideshow works with fade
+  - try loading -bg1.$bgext
+  - if successful
+    - cache and show it
+    - start a setInterval, which
+      - tries loading -bg$next.$bgext
+      - if successful
+        - cache and show it
+        - increase $bgnext
+      - if unsuccessful
+        - reset $bgnext and show from cache
+- video background (use bgext=mp4) and have `gamename-bg.mp4` available
+- rename extlink to openexclusively
+- rename extlink2 to extlink (also: options, README.md, bigbox3d.config.json.example)
+- vertically center the loading div
+
 ## v1.4.0
 
 - show loading counter, e.g. "loading... (3 / 6)"
@@ -13,6 +32,7 @@
 ## v1.3.0
 
 - extended functionality with bigbox3d.php
+
   - provides specific meta tags for sharing links in Facebook, Twitter etc.
   - utilized bigbox3d.conf.json so that you can omit URL params like path, ext and bg
 

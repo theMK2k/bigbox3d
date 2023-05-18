@@ -1,20 +1,5 @@
 # TODO
 
-- bg image slideshow
-  -> investigate bg slideshow works with fade
-  - try loading -bg1.$bgext
-  - if successful
-    - cache and show it
-    - start a setInterval, which
-      - tries loading -bg$next.$bgext
-      - if successful
-        - cache and show it
-        - increase $bgnext
-      - if unsuccessful
-        - reset $bgnext and show from cache
-
-- vertically center the loading div
-
 - investigate normal mapping
   - <https://dev.to/ndesmic/webgl-engine-from-scratch-15-normal-maps-3227>
   - <http://olegon.github.io/html5-webgl-normalmapping/>

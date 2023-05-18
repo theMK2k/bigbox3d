@@ -19,16 +19,17 @@
   whatever comes first.
 */
 const opts = {
-  // Options also available via bigbox3d.config.json and as URL parameters
+  // Options also available via bigbox3d.config.json (if you use bigbox3d.php) and as URL parameters
   name: "template-", // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
   path: null, // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
   ext: "jpg", // the file extension of the box texture files, e.g. "?ext=png" if you have .png files
-  usevignette: true, // use a vignette effect for the background
-  bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "?bgext=gif" if you have .gif background file
   bg: "000000", // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
+  bgvignette: true, // use a vignette effect for the background
+  bgpattern: true, // use a pattern effect for the background
+  bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "?bgext=gif" if you have .gif background file or "?bgext=mp4" if you have a video file
   bginterval: 10, // the interval in seconds to change the background image (applies if you have multiple background images)
 
-  // Options also available via bigbox3d.config.json
+  // Options also available via bigbox3d.config.json (if you use bigbox3d.php)
   host: "", // the host to load the images from, e.g. "https://example.com" (please don't forget your server-side CORS settings!)
   debug: false, // DEBUG ONLY: activate debug mode
 };
@@ -970,6 +971,63 @@ function onPointerUp(e) {
 */
 const canvas = document.querySelector("#glcanvas");
 
+function init() {
+  logger.log("config:", config);
+
+  document.getElementById("gldiv").style.opacity = "1";
+
+  opts.name = getQueryVariable("name") || opts.name;
+  opts.name = opts.name
+    .replace(/%2F/g, "/")
+    .replace(/%2520/g, " ")
+    .replace(/\+/g, " ");
+
+  opts.path = getQueryVariable("path") || config.path || opts.path;
+  opts.path = opts.path
+    ? opts.path.replace(/%2F/g, "/").replace(/%2520/g, " ").replace(/\+/g, " ")
+    : null;
+
+  opts.ext = getQueryVariable("ext") || config.ext || opts.ext;
+  opts.bgext = getQueryVariable("bgext") || config.bgext || opts.bgext;
+  
+  opts.bgvideo = (opts.bgext === "mp4" || false);
+
+  opts.bgvignette = hasValue(getQueryVariable("bgvignette"))
+    ? getQueryVariable("bgvignette")
+    : hasValue(config.bgvignette)
+    ? config.bgvignette
+    : opts.bgvignette;
+
+  opts.bgpattern = hasValue(getQueryVariable("bgpattern"))
+    ? getQueryVariable("bgpattern")
+    : hasValue(config.bgpattern)
+    ? config.bgpattern
+    : opts.bgpattern;
+
+  opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
+
+  opts.debug = getQueryVariable("debug") || opts.debug;
+
+  document.getElementById("gldiv").style.backgroundColor = opts.bg;
+  document.getElementById("bg0").style.backgroundColor = opts.bg;
+  document.getElementById("bg1").style.backgroundColor = opts.bg;
+
+  logger.log("opts:", opts);
+
+  if (self !== top) {
+    // The current window is nested within an <iframe> or <object>.
+    logger.log("embedding detected");
+    document.getElementById("openexclusively").style.display = "block";
+  } else {
+    logger.log("no embedding detected");
+  }
+
+  if (config.extlink && config.extlink_innerhtml) {
+    document.getElementById("extlink_a").href = config.extlink;
+    document.getElementById("extlink_a").innerHTML = config.extlink_innerhtml;
+  }
+}
+
 function webGLStart() {
   // calcDimensions();
 
@@ -1011,18 +1069,28 @@ function webGLStart() {
   const baseFullPath = (config.host || "") + (opts.path || "") + opts.name;
 
   // Background Image (inspired by http://bigboxcollection.com/)
-  getNextBg(baseFullPath, opts.bgext || opts.ext);
-  bgimgData.bgChangeInterval = setInterval(() => {
-    getNextBg(baseFullPath, opts.bgext || opts.ext);
-  }, opts.bginterval * 1000);
+  getNextBg(baseFullPath, opts.bgext || opts.ext, opts.bgvideo);
+  if (!opts.bgvideo) {
+    bgimgData.bgChangeInterval = setInterval(() => {
+      getNextBg(baseFullPath, opts.bgext || opts.ext);
+    }, opts.bginterval * 1000);
+  }
 
   if (
-    opts.usevignette === "true" ||
-    opts.usevignette === true ||
-    opts.usevignette == 1
+    opts.bgvignette === "true" ||
+    opts.bgvignette === true ||
+    opts.bgvignette == 1
   ) {
     document.getElementById("glcanvas").style.boxShadow =
       "inset 0 2px 10em 2px rgba(0, 0, 0, 0.8)";
+  }
+
+  if (
+    opts.bgpattern === "true" ||
+    opts.bgpattern === true ||
+    opts.bgpattern == 1
+  ) {
+    document.getElementById("bgfilter").style.opacity = 1;
   }
 
   document.getElementById("loading-total").innerText = "6";
@@ -1044,61 +1112,27 @@ function webGLStart() {
   redraw();
 }
 
-function init() {
-  logger.log("config:", config);
-
-  document.getElementById("gldiv").style.opacity = "1";
-
-  opts.name = getQueryVariable("name") || opts.name;
-  opts.name = opts.name
-    .replace(/%2F/g, "/")
-    .replace(/%2520/g, " ")
-    .replace(/\+/g, " ");
-
-  opts.path = getQueryVariable("path") || config.path || opts.path;
-  opts.path = opts.path
-    ? opts.path.replace(/%2F/g, "/").replace(/%2520/g, " ").replace(/\+/g, " ")
-    : null;
-
-  opts.ext = getQueryVariable("ext") || config.ext || opts.ext;
-  opts.bgext = getQueryVariable("bgext") || config.bgext || opts.bgext;
-
-  opts.usevignette = hasValue(getQueryVariable("usevignette"))
-    ? getQueryVariable("usevignette")
-    : hasValue(config.usevignette)
-    ? config.usevignette
-    : opts.usevignette;
-
-  opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
-
-  opts.debug = getQueryVariable("debug") || opts.debug;
-
-  document.getElementById("gldiv").style.backgroundColor = opts.bg;
-  document.getElementById("bg0").style.backgroundColor = opts.bg;
-  document.getElementById("bg1").style.backgroundColor = opts.bg;
-
-  logger.log("opts:", opts);
-
-  if (self !== top) {
-    // The current window is nested within an <iframe> or <object>.
-    logger.log("embedding detected");
-    document.getElementById("extlink").style.display = "block";
-  } else {
-    logger.log("no embedding detected");
-  }
-
-  if (config.extlink2 && config.extlink2_innerhtml) {
-    document.getElementById("extlink2_a").href = config.extlink2;
-    document.getElementById("extlink2_a").innerHTML = config.extlink2_innerhtml;
-  }
-}
-
-function getNextBg(baseFullPath, ext) {
+function getNextBg(baseFullPath, ext, video) {
   logger.log("[getNextBg] bgimgData.currentBgNum:", bgimgData.currentBgNum);
+
+  if (video) {
+    document.getElementById("bgvideosource").src =
+      baseFullPath + "bg" + "." + ext;
+    document.getElementById("bgvideosource").type = "video/mp4";
+    document.getElementById("bgvideo").style.opacity = "1";
+    document.getElementById("bgvideo").load();
+    document.getElementById("bgvideo").play(); // this can fail
+    document.getElementById("bgvideocontrols").style.display = "block";
+    updateBgVideoPlayPause();
+    return;
+  }
 
   const url = baseFullPath + "bg" + bgimgData.currentBgNum + "." + ext;
 
-  if (bgimgData.maxBgNum !== -1 && bgimgData.currentBgNum > bgimgData.maxBgNum) {
+  if (
+    bgimgData.maxBgNum !== -1 &&
+    bgimgData.currentBgNum > bgimgData.maxBgNum
+  ) {
     bgimgData.currentBgNum = 0;
   }
 
@@ -1157,21 +1191,36 @@ function applyBgImage(bgimgURL) {
     otherBgDiv
   );
 
-  // document.getElementById("bg1").style.backgroundColor = "black"; // reset background color, else the image will be mixed with that color
-  // document.getElementById("bg2").style.backgroundColor = "black"; // reset background color, else the image will be mixed with that color
   if (
-    document.getElementById(currentBgDiv).style.backgroundSize !==
-    "auto, 100% 100%"
+    document.getElementById(currentBgDiv).style.backgroundSize !== "100% 100%"
   ) {
-    document.getElementById(currentBgDiv).style.backgroundSize =
-      "auto, 100% 100%";
-    document.getElementById(currentBgDiv).style.backgroundPosition =
-      "0% 0%, 50% 50%";
+    document.getElementById(currentBgDiv).style.backgroundSize = "100% 100%";
+    document.getElementById(currentBgDiv).style.backgroundPosition = "50% 50%";
   }
+
   document.getElementById(currentBgDiv).style.backgroundImage =
-    "url('bg-pattern.png'), url('" + bgimgURL + "')";
+    "url('" + bgimgURL + "')";
   document.getElementById(otherBgDiv).style.opacity = 0;
   document.getElementById(currentBgDiv).style.opacity = 1;
+}
+
+function bgVideoPlayPause() {
+  const video = document.getElementById("bgvideo");
+  if (video.paused) {
+    video.play();
+  } else {
+    video.pause();
+  }
+  updateBgVideoPlayPause();
+}
+
+function updateBgVideoPlayPause() {
+  const video = document.getElementById("bgvideo");
+  if (video.paused) {
+    document.getElementById("bgvideocontrols").innerText = "⏵";
+  } else {
+    document.getElementById("bgvideocontrols").innerText = "⏸";
+  }
 }
 
 init();
