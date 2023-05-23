@@ -13,19 +13,22 @@
 
         */
         const config = {
-          host: "", // the host of your images (typically the same host, bigbox3d.html resides at)
-          path: "", // base path to image files, e.g. "/bigbox3d/img/"
-          ext: "jpg", // the file extension of the box texture files, e.g. "png" if you use .png files
-          bg: "000000", // the static background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
-          bgvignette: true, // use a vignette effect for the background
-          bgpattern: true, // use a pattern effect for the background
-          bgext: "jpg", // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g.
-          //   "?bgext=gif" if you have .gif background file
-          //   "?bgext=mp4" if you have a video file (for videos currently only mp4 is supported)
-          bginterval: 10, // the interval in seconds to change the background image (applies if you have multiple background images)
-          extlink: "https://github.com/theMK2k/bigbox3d", // an external link to be displayed in the bottom left corner
-          extlink_innerhtml:
-            "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link
+          // host: "",                                                               // the host of your images, typically the same host, bigbox3d.html resides at (default: "", e.g. "https://example.com")
+          // path: "",                                                               // base path to image files (default: "", e.g. "/bigbox3d/img/")
+          // ext: "jpg",                                                             // the file extension of the box texture files (default: "jpg", e.g. "png" if you use .png files)
+          // bg: "ffffff",                                                           // the static background color, IMPORTANT: please always use 6 hex characters! (default: "000000", e.g. "ffffff" if you want a white background)
+          // bgvignette: true,                                                       // use a vignette effect for the background (default: true)
+          // bgpattern: true,                                                        // use a pattern effect for the background (default: true)
+          // bgext: "jpg",                                                           // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g.
+          //                                                                            "?bgext=gif" if you have .gif background file
+          //                                                                            "?bgext=mp4" if you have a video file (for videos currently only mp4 is supported)
+          // bginterval: 10,                                                         // the interval in seconds to change the background image (applies if you have multiple background images)
+          // extlink: "https://github.com/theMK2k/bigbox3d",                         // an external link to be displayed in the bottom left corner
+          // extlink_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link,
+          // rotation_speed: 20,                                                     // the rotation speed of the box when mouse-dragged (default: 20, range: 1-100)
+          // rotation_amortization: 0.91,                                            // the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)
+          // rotation_initial_x: 0.15,                                               // initial rotation on the x-axis (default: 0.15, range: 0.0-1.0)
+          // rotation_initial_y: -0.15,                                              // initial rotation on the y-axis (default: -0.15, range: 0.0-1.0)
         };
       </script>
     </div>
@@ -135,7 +138,7 @@
       z-index: 1;
       transition: opacity 1s;
       transition-timing-function: ease-in-out;
-      opacity: 0;
+      opacity: 1;
     }
 
     #bg1 {
@@ -178,7 +181,7 @@
       height: 100%;
       overflow: hidden;
       z-index: 3;
-      background-color: transparent;
+      /* background-color: black; */ /* transparent doesn't work */
       position: absolute;
     }
 

@@ -28,7 +28,7 @@ Optionally, provide one or more background images, starting with `-bg0`:
 - gamename-bg1.png
 - gamename-bg2.png
 
-or an mp4 video file:
+or an mp4 video file as background:
 
 - gamename-bg.mp4
 
@@ -37,23 +37,33 @@ or an mp4 video file:
 parameter|description|default value|examples
 -|-|-|-
 name|the base name of the image files|`template-`|`?name=gamename-`, `?name=Ultimate%20DOOM_`
-path|base path to files|`null`|`?path=/img/` if files are in "img" sub-directory
-ext|the file extension of the files|`jpg`|`?ext=png` if you have .png files
-bg|the background color, **IMPORTANT**: always use 6 hex characters!|`000000`|`?bg=ffffff` if you want a white background
+path|base path to image files|`null`|`?path=/img/` if files are in "img" sub-directory
+ext|the file extension of the box texture files|`jpg`|`?ext=png` if you have .png files
+bg|the static background color, **IMPORTANT**: always use 6 hex characters!|`000000`|`?bg=ffffff` if you want a white background
 bgvignette|use a vignette effect for the background|`true`|`?bgvignette=false` to turn it off
 bgpattern|use a pattern effect for the background|`true`|`?bgpattern=false` to turn it off
-bgext|the file extension of the background images|(same as ext)|`?bgext=gif` if you have .gif files or `?bgext=mp4` if you have a video file (for videos currently only `mp4` is supported)
-bginterval|the interval in seconds to change the background image|`10`|`?bginterval=60` to change the background image every minute
+bgext|the file extension of the background file|(same as ext)|`?bgext=gif` if you have .gif files or `?bgext=mp4` if you have a video file (for videos currently only `mp4` is supported)
+bginterval|the interval in seconds to change the background image (applies if you have multiple background images)|`10`|`?bginterval=60` to change the background image every minute
 
 ## Extended Usage
 
 You can extend the usage by utilizing `bigbox3d.php` which will:
 
 - load your default config from bigbox3d.config.json so you can omit URL parameters like path, ext and bg (see [bigbox3d.config.json.example](bigbox3d.config.json.example))
-  - additional config options:
-    - extlink
-    - extlink_innerhtml
 - provide specific meta tags (og:title, og:image, twitter:image) defined by the name URL parameter
+
+alternatively you can edit the config section in `bigbox3d.html`, however, you need to back it up if you update bigbox3d to a newer version which will overwrite `bigbox3d.html`!
+
+The additional config options for `bigbox3d.config.json` and `bigbox3d.html` are:
+
+option|description|default value|example
+-|-|-|-
+extlink|an external link to be displayed in the bottom left corner|`https://github.com/theMK2k/bigbox3d`|`https://your.site`
+extlink_innerhtml|the innerHTML of the external link|`scanned by MK2k, presented with <b>Big Box 3D</b>`|`scanned by me`
+rotation_speed|the rotation speed of the box when mouse-dragged (default: 20, range: 1-100)|`20`|`40` for faster rotation when mouse-dragged
+rotation_amortization|the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)|`0.91`|`0.99` for slower amortization, `0.87` for faster amortization, `1.0` for no amortization at all
+rotation_initial_x|initial rotation on the x-axis (default: 0.15, range: -1.0 to 1.0)|`0.15`|`0.20` for a faster initial rotation, `-0.15` for inverted initial rotation
+rotation_initial_y|initial rotation on the y-axis (default: -0.15, range: -1.0 to 1.0)|`-0.15`|`-0.20` for a faster initial rotation, `0.15` for inverted initial rotation
 
 ## Controls inside the view
 

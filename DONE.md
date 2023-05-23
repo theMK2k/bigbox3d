@@ -2,6 +2,19 @@
 
 ## v1.5.0 (WIP)
 
+- add new options (config-only):
+  - rotation_amortizaton (0.91)
+  - rotation_speed (20)
+
+- fix glcanvas background color
+  - fixed by dynamically updating glcanvas color based on the fact if we successfully loaded a bg image
+  - transparent
+    - works with bg image and effects
+    - doesn't work with static color bg
+  - black
+    - works with static color bg (no pattern effect)
+    - doesn't work with image
+
 - bg image slideshow
   -> investigate bg slideshow works with fade
   - try loading -bg1.$bgext

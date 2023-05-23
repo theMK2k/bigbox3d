@@ -19,19 +19,28 @@
   whatever comes first.
 */
 const opts = {
-  // Options also available via bigbox3d.config.json (if you use bigbox3d.php) and as URL parameters
+  // Options available as URL parameters
   name: "template-", // the base name of the image files, e.g. "?name=Ultimate%20DOOM-" if you have files named "Ultimate DOOM-front.jpg", "Ultimate DOOM-back.jpg" etc.
-  path: null, // base path to files, e.g. "?path=/img/" if files are in "img" sub-directory
-  ext: "jpg", // the file extension of the box texture files, e.g. "?ext=png" if you have .png files
-  bg: "000000", // the background color, e.g. "ffffff" if you want it white (IMPORTANT: please always use 6 hex characters!)
-  bgvignette: true, // use a vignette effect for the background
-  bgpattern: true, // use a pattern effect for the background
-  bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g. "?bgext=gif" if you have .gif background file or "?bgext=mp4" if you have a video file
+
+  // Options available as URL parameters as well as bigbox3d.config.json (if you use bigbox3d.php) or bigbox3d.html's config section
+  path: null, // base path to image files (default: "", e.g. "/bigbox3d/img/")
+  ext: "jpg", // the file extension of the box texture files (default: "jpg", e.g. "png" if you use .png files)
+  bg: "000000", // the static background color, IMPORTANT: please always use 6 hex characters! (default: "000000", e.g. "ffffff" if you want a white background)
+  bgvignette: true, // use a vignette effect for the background (default: true)
+  bgpattern: true, // use a pattern effect for the background (default: true)
+  bgext: null, // the file extension of the background file (provide this if you have a background image file with a different extension than the texture files of the box), e.g.
+  // "?bgext=gif" if you have .gif background file
+  // "?bgext=mp4" if you have a video file (for videos currently only mp4 is supported)
   bginterval: 10, // the interval in seconds to change the background image (applies if you have multiple background images)
 
-  // Options also available via bigbox3d.config.json (if you use bigbox3d.php)
-  host: "", // the host to load the images from, e.g. "https://example.com" (please don't forget your server-side CORS settings!)
-  debug: false, // DEBUG ONLY: activate debug mode
+  // Options only available with bigbox3d.config.json (if you use bigbox3d.php) or bigbox3d.html's config section
+  host: "", // the host of your images, typically the same host, bigbox3d.html resides at (default: "", e.g. "https://example.com")
+  extlink: "https://github.com/theMK2k/bigbox3d", // an external link to be displayed in the bottom left corner
+  extlink_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link,
+  rotation_speed: 20, // the rotation speed of the box when mouse-dragged (default: 20, range: 1-100)
+  rotation_amortization: 0.91, // the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)
+  rotation_initial_x: 0.15, // initial rotation on the x-axis (default: 0.15, range: 0.0-1.0)
+  rotation_initial_y: -0.15, // initial rotation on the y-axis (default: -0.15, range: 0.0-1.0)
 };
 // #endregion Options
 
@@ -731,10 +740,10 @@ function animate() {
   const timeNow = new Date().getTime();
 
   if (dragMode === enmDragMode.none && lastDragMode === enmDragMode.rotate) {
-    dX *= AMORTIZATION;
-    dY *= AMORTIZATION;
-    THETA += 20 * dX;
-    PHI += 20 * dY;
+    dX *= opts.rotation_amortization;
+    dY *= opts.rotation_amortization;
+    THETA += opts.rotation_speed * dX;
+    PHI += opts.rotation_speed * dY;
   }
 
   if (lastTime != 0) {
@@ -766,19 +775,17 @@ const enmDragMode = {
   move: 2,
 };
 
-const AMORTIZATION = 0.91;
 let dragMode = enmDragMode.none;
 let lastDragMode = enmDragMode.rotate; // initialize it with "rotate" so we can have our little rotation intro animation
 let old_x, old_y;
-let dX = 0.15,
-  dY = -0.15;
+let dX, dY;
 
 const rotate = function (e) {
   dX = ((e.pageX - old_x) * 2 * Math.PI) / canvas.width;
   dY = ((e.pageY - old_y) * 2 * Math.PI) / canvas.height;
 
-  THETA += 20 * dX;
-  PHI += 20 * dY;
+  THETA += opts.rotation_speed * dX;
+  PHI += opts.rotation_speed * dY;
 
   (old_x = e.pageX), (old_y = e.pageY);
   e.preventDefault();
@@ -989,24 +996,47 @@ function init() {
 
   opts.ext = getQueryVariable("ext") || config.ext || opts.ext;
   opts.bgext = getQueryVariable("bgext") || config.bgext || opts.bgext;
-  
-  opts.bgvideo = (opts.bgext === "mp4" || false);
+
+  opts.bgvideo = opts.bgext === "mp4" || false;
 
   opts.bgvignette = hasValue(getQueryVariable("bgvignette"))
-    ? getQueryVariable("bgvignette")
+    ? getQueryVariable("bgvignette") === "true" ||
+      getQueryVariable("bgvignette") === "1"
     : hasValue(config.bgvignette)
     ? config.bgvignette
     : opts.bgvignette;
 
   opts.bgpattern = hasValue(getQueryVariable("bgpattern"))
-    ? getQueryVariable("bgpattern")
+    ? getQueryVariable("bgpattern") === "true" ||
+      getQueryVariable("bgpattern") === "1"
     : hasValue(config.bgpattern)
     ? config.bgpattern
     : opts.bgpattern;
 
   opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
 
-  opts.debug = getQueryVariable("debug") || opts.debug;
+  opts.rotation_speed = config.rotation_speed || opts.rotation_speed;
+  opts.rotation_amortization =
+    config.rotation_amortization || opts.rotation_amortization;
+  opts.rotation_initial_x =
+    config.rotation_initial_x || opts.rotation_initial_x;
+  opts.rotation_initial_y =
+    config.rotation_initial_y || opts.rotation_initial_y;
+
+  // initial rotation
+  const amortization_factor =
+    Math.abs(
+      (0.91 - opts.rotation_amortization) *
+        (0.91 - opts.rotation_amortization) *
+        (0.91 - opts.rotation_amortization) *
+        25000
+    ) + 1;
+  dX =
+    (opts.rotation_initial_x * (20 / opts.rotation_speed)) /
+    amortization_factor;
+  dY =
+    (opts.rotation_initial_y * (20 / opts.rotation_speed)) /
+    amortization_factor;
 
   document.getElementById("gldiv").style.backgroundColor = opts.bg;
   document.getElementById("bg0").style.backgroundColor = opts.bg;
@@ -1102,12 +1132,12 @@ function webGLStart() {
   initTexture(baseFullPath + "right." + opts.ext, texturen);
   initTexture(baseFullPath + "left." + opts.ext, texturen);
 
-  gl.clearColor(
-    hexToRgb(opts.bg).r / 255,
-    hexToRgb(opts.bg).g / 255,
-    hexToRgb(opts.bg).b / 255,
-    0.0
-  );
+  // gl.clearColor(
+  //   hexToRgb(opts.bg).r / 255,
+  //   hexToRgb(opts.bg).g / 255,
+  //   hexToRgb(opts.bg).b / 255,
+  //   0.0
+  // );
   gl.enable(gl.DEPTH_TEST);
   redraw();
 }
@@ -1155,6 +1185,8 @@ function getNextBg(baseFullPath, ext, video) {
     .then((data) => {
       if (!data) return;
 
+      document.getElementById("glcanvas").style.backgroundColor = "transparent";
+
       const bgimgURL = URL.createObjectURL(data);
       bgimgData.cache[bgimgData.currentBgNum] = bgimgURL;
       applyBgImage(bgimgURL);
@@ -1166,6 +1198,20 @@ function getNextBg(baseFullPath, ext, video) {
       if (bgimgData.currentBgNum === 0) {
         // we couldn't even fetch the first image
         clearInterval(bgimgData.bgChangeInterval);
+
+        if (opts.bgpattern) {
+          document.getElementById("glcanvas").style.backgroundSize = "auto";
+          document.getElementById("glcanvas").style.backgroundPosition =
+            "0% 0%";
+          document.getElementById("glcanvas").style.backgroundImage =
+            'url("bg-pattern.png")';
+        }
+        if (opts.bgvignette) {
+          document.getElementById("glcanvas").style.boxShadow =
+            "rgba(0, 0, 0, 0.8) 0px 2px 10em 2px inset";
+        }
+        document.getElementById("glcanvas").style.backgroundColor = opts.bg;
+
         return;
       }
 
