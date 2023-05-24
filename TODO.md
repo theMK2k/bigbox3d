@@ -2,6 +2,8 @@
 
 - create an interactive demo site (maybe also a config generator?)
 
+- background filters pop up and get closed shortly after (see: <https://themk2k.github.io/bigbox3d/embedded.html>), better show the effects when everything's settled
+
 - investigate normal mapping
   - <https://dev.to/ndesmic/webgl-engine-from-scratch-15-normal-maps-3227>
   - <http://olegon.github.io/html5-webgl-normalmapping/>
