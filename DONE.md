@@ -1,6 +1,10 @@
 # DONE
 
-## v1.5.0 (WIP)
+## v1.6.0 (WIP)
+
+- nothing
+
+## v1.5.0
 
 - add new options (config-only):
   - rotation_amortizaton (0.91)
