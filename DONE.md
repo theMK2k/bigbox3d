@@ -32,6 +32,8 @@
 - rename extlink2 to extlink (also: options, README.md, bigbox3d.config.json.example)
 - vertically center the loading div
 
+- updated gl-matrix 2.3.2 to 3.4.3
+
 ## v1.4.0
 
 - show loading counter, e.g. "loading... (3 / 6)"

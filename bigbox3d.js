@@ -1,5 +1,5 @@
 /**
- * BIG BOX 3D v1.4.0
+ * BIG BOX 3D v1.5.0
  * ©2023 Jörg "MK2k" Sonntag
  */
 
@@ -96,9 +96,9 @@ const texturen = new Array();
 
 let allLoaded = false;
 
-let mvMatrix = mat4.create();
+let mvMatrix = glMatrix.mat4.create();
 const mvMatrixStack = [];
-const pMatrix = mat4.create();
+const pMatrix = glMatrix.mat4.create();
 
 let vertBuffer = null;
 let coordBuffer = null;
@@ -459,8 +459,8 @@ function initTexture(sFilename, textures) {
 }
 
 function mvPushMatrix() {
-  const copy = mat4.create();
-  mat4.copy(copy, mvMatrix);
+  const copy = glMatrix.mat4.create();
+  glMatrix.mat4.copy(copy, mvMatrix);
   mvMatrixStack.push(copy);
 }
 
@@ -671,7 +671,7 @@ function drawScene() {
 
   //gl.uniform2fv(scalelocation, [2, 2]);
 
-  mat4.perspective(
+  glMatrix.mat4.perspective(
     pMatrix,
     perspectiveAngle,
     gl.viewportWidth / gl.viewportHeight,
@@ -679,13 +679,13 @@ function drawScene() {
     100.0
   );
 
-  mat4.identity(mvMatrix);
+  glMatrix.mat4.identity(mvMatrix);
 
-  mat4.translate(mvMatrix, mvMatrix, [perspectiveX, perspectiveY, -5.0]);
+  glMatrix.mat4.translate(mvMatrix, mvMatrix, [perspectiveX, perspectiveY, -5.0]);
 
-  mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [1, 0, 0]);
-  mat4.rotate(mvMatrix, mvMatrix, degToRad(yRot), [0, 1, 0]);
-  mat4.rotate(mvMatrix, mvMatrix, degToRad(zRot), [0, 0, 0]);
+  glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [1, 0, 0]);
+  glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(yRot), [0, 1, 0]);
+  glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(zRot), [0, 0, 0]);
 
   setMatrixUniforms();
 

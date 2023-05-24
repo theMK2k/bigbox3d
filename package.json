@@ -1,6 +1,6 @@
 {
   "name": "bigbox3d",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "A 3D Big Box web viewer. Check out the Demo Site: <https://themk2k.github.io/bigbox3d/>.",
   "main": "bigbox3d.js",
   "scripts": {

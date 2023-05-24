@@ -1,5 +1,7 @@
 # TODO
 
+- create an interactive demo site (maybe also a config generator?)
+
 - investigate normal mapping
   - <https://dev.to/ndesmic/webgl-engine-from-scratch-15-normal-maps-3227>
   - <http://olegon.github.io/html5-webgl-normalmapping/>
