@@ -1,5 +1,7 @@
 # TODO
 
+- better readable play/pause button (see: openexlcusively button)
+
 - create an interactive demo site (maybe also a config generator?)
 
 - background filters pop up and get closed shortly after (see: <https://themk2k.github.io/bigbox3d/embedded.html>), better show the effects when everything's settled
