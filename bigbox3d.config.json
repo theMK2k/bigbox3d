@@ -1,0 +1,16 @@
+{
+  "host": "https://mk2k.net",
+  "path": "/bigbox3d/img/",
+  "ext": "jpg",
+  "bgext": "gif",
+  "bg": "000000",
+  "extlink": "https://github.com/theMK2k/bigbox3d",
+  "extlink_innerhtml": "scanned by MK2k, presented with <b>Big Box 3D</b>",
+  "bgvignette": true,
+  "bgpattern": true,
+  "bginterval": 10,
+  "rotation_speed": 20,
+  "rotation_amortization": 1,
+  "rotation_initial_x": -0.15,
+  "rotation_initial_y": 0.000001
+}
