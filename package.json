@@ -4,6 +4,7 @@
   "description": "A 3D Big Box web viewer. Check out the Demo Site: <https://themk2k.github.io/bigbox3d/>.",
   "main": "bigbox3d.js",
   "scripts": {
+    "start": "npx serve --config ./serve.json .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

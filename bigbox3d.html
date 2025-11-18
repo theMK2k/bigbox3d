@@ -41,9 +41,21 @@
       varying vec2 vTextureCoord;
 
       uniform sampler2D uSampler;
+      uniform vec2 uTextureSize;
 
       void main(void) {
-          gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+          // Apply a subtle blur to reduce moiré patterns from scanned textures
+          vec2 texelSize = vec2(1.0) / uTextureSize;
+          float blurAmount = 0.0; // Adjust between 0.0 (no blur) and 1.0 (more blur)
+          
+          // Sample the texture with a small blur kernel
+          vec4 color = texture2D(uSampler, vTextureCoord) * 0.4;
+          color += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
+          color += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
+          color += texture2D(uSampler, vTextureCoord + vec2(0.0, texelSize.y * blurAmount)) * 0.15;
+          color += texture2D(uSampler, vTextureCoord - vec2(0.0, texelSize.y * blurAmount)) * 0.15;
+          
+          gl_FragColor = color;
       }
     </script>
 

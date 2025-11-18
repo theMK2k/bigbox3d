@@ -1,0 +1,6 @@
+{
+  "cleanUrls": false,
+	"redirects": [{ "source": "/", "destination": "/index.html", "type": 301 }, {
+    "source": "/bigbox3d/", "destination": "/", "type": 301
+  }]
+}

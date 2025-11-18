@@ -394,6 +394,10 @@ function initShaders() {
     shaderProgram.program,
     "uSampler"
   );
+  shaderProgram.program.textureSizeUniform = gl.getUniformLocation(
+    shaderProgram.program,
+    "uTextureSize"
+  );
 }
 
 function initTexture(sFilename, textures) {
@@ -419,8 +423,23 @@ function initTexture(sFilename, textures) {
 
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); //gl.NEAREST
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST); //gl.NEAREST
+    
+    // Check if texture dimensions are power of two
+    const isPowerOfTwo = (value) => (value & (value - 1)) === 0;
+    const width = textures[anz].image.width;
+    const height = textures[anz].image.height;
+    
+    if (isPowerOfTwo(width) && isPowerOfTwo(height)) {
+      // Generate mipmaps for power-of-two textures to reduce moiré patterns
+      gl.generateMipmap(gl.TEXTURE_2D);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    } else {
+      // Use linear filtering for non-power-of-two textures
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+    }
+    
+    // Use linear filtering for magnification to reduce moiré patterns
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
 
     if (
       extAnisotropic &&
@@ -711,26 +730,32 @@ function drawScene() {
 
   // Draw face 0
   gl.bindTexture(gl.TEXTURE_2D, texturen[0].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[0].image.width, texturen[0].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
 
   // Draw face 1
   gl.bindTexture(gl.TEXTURE_2D, texturen[1].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[1].image.width, texturen[1].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 12);
 
   // Draw face 2
   gl.bindTexture(gl.TEXTURE_2D, texturen[2].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[2].image.width, texturen[2].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 24);
 
   // Draw face 3
   gl.bindTexture(gl.TEXTURE_2D, texturen[3].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[3].image.width, texturen[3].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 36);
 
   // Draw face 4
   gl.bindTexture(gl.TEXTURE_2D, texturen[4].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[4].image.width, texturen[4].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 48);
 
   // Draw face 5
   gl.bindTexture(gl.TEXTURE_2D, texturen[5].texture);
+  gl.uniform2f(shaderProgram.program.textureSizeUniform, texturen[5].image.width, texturen[5].image.height);
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 60);
 }
 
