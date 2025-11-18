@@ -42,13 +42,17 @@
 
       uniform sampler2D uSampler;
       uniform vec2 uTextureSize;
+      uniform float uPerspectiveAngle;
 
       void main(void) {
-          // Apply a subtle blur to reduce moiré patterns from scanned textures
+          // Calculate blur amount based on zoom level (perspectiveAngle)
+          // blurAmount = (perspectiveAngle - 44.0) * 10.0
+          // At perspectiveAngle=44 (zoomed in): blurAmount=0
+          // At perspectiveAngle=45 (default): blurAmount=10
           vec2 texelSize = vec2(1.0) / uTextureSize;
-          float blurAmount = 0.0; // Adjust between 0.0 (no blur) and 1.0 (more blur)
+          float blurAmount = (uPerspectiveAngle - 44.0) * 10.0;
           
-          // Sample the texture with a small blur kernel
+          // Sample the texture with a blur kernel proportional to zoom
           vec4 color = texture2D(uSampler, vTextureCoord) * 0.4;
           color += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
           color += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;

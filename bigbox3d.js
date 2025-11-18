@@ -398,6 +398,10 @@ function initShaders() {
     shaderProgram.program,
     "uTextureSize"
   );
+  shaderProgram.program.perspectiveAngleUniform = gl.getUniformLocation(
+    shaderProgram.program,
+    "uPerspectiveAngle"
+  );
 }
 
 function initTexture(sFilename, textures) {
@@ -707,6 +711,9 @@ function drawScene() {
   glMatrix.mat4.rotate(mvMatrix, mvMatrix, degToRad(zRot), [0, 0, 0]);
 
   setMatrixUniforms();
+  
+  // Pass perspective angle to shader for dynamic blur adjustment
+  gl.uniform1f(shaderProgram.program.perspectiveAngleUniform, perspectiveAngle);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer.buffer);
   gl.vertexAttribPointer(
