@@ -75,5 +75,32 @@
       </div>
     </div>
   </div>
+  <script>
+    // Remove /bigbox3d/ prefix from hrefs when serving locally
+    (function() {
+      // Check if we're on localhost or 127.0.0.1
+      const isLocal = window.location.hostname === 'localhost' || 
+                      window.location.hostname === '127.0.0.1' ||
+                      window.location.hostname === '';
+      
+      if (isLocal) {
+        // Get all anchor tags
+        const links = document.querySelectorAll('a[href]');
+        
+        links.forEach(link => {
+          const href = link.getAttribute('href');
+          
+          // Skip if it's an external link or doesn't contain /bigbox3d/
+          if (!href || href.startsWith('http://') || href.startsWith('https://') || !href.includes('/bigbox3d/')) {
+            return;
+          }
+          
+          // Remove all occurrences of /bigbox3d/ from the href
+          const newHref = href.replace(/\/bigbox3d\//g, '/');
+          link.setAttribute('href', newHref);
+        });
+      }
+    })();
+  </script>
 </body>
 </html>
