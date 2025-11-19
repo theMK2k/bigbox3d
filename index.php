@@ -93,9 +93,20 @@
           if (substr($file, -strlen($previewSuffix)) === $previewSuffix) {
             // Extract the name by removing "-preview.jpg"
             $name = substr($file, 0, -strlen($previewSuffix));
+
+            // Look for bg0 file with any extension
+            $bgExt = null;
+            foreach ($files as $bgFile) {
+              if (preg_match('/^' . preg_quote($name, '/') . '-bg0\.(.+)$/', $bgFile, $matches)) {
+                $bgExt = $matches[1];
+                break;
+              }
+            }
+
             $items[] = [
               'name' => $name,
-              'preview' => 'img/' . $file
+              'preview' => 'img/' . $file,
+              'bgext' => $bgExt
             ];
           }
         }
@@ -113,6 +124,11 @@
           $displayName = str_replace('_', ' ', $name);
           $preview = htmlspecialchars($item['preview']);
           $url = 'bigbox3d.php?name=' . urlencode($name) . '-';
+
+          // Add bgext parameter if background extension was found
+          if ($item['bgext']) {
+            $url .= '&bgext=' . urlencode($item['bgext']);
+          }
 
           echo '<div class="card" onclick="window.open(\'' . $url . '\', \'_blank\')">';
           echo '    <img src="' . $preview . '" alt="' . $displayName . '" class="card-image">';
