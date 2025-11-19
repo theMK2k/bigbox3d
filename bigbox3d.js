@@ -1198,8 +1198,6 @@ function init() {
 function webGLStart() {
   // calcDimensions();
 
-  window.addEventListener("resizeCanvas", canvas, false);
-
   canvas.addEventListener("wheel", mouseWheel, false);
 
   window.addEventListener("keydown", keyDown, false);
@@ -1221,8 +1219,18 @@ function webGLStart() {
     logger.log("resize canvas!");
     canvas.width = window.innerWidth; // -20
     canvas.height = window.innerHeight; // -20
+    
+    // Update WebGL viewport dimensions
+    if (gl) {
+      gl.viewportWidth = canvas.width;
+      gl.viewportHeight = canvas.height;
+    }
+    
     redraw();
   }
+
+  // Add window resize listener
+  window.addEventListener("resize", resizeCanvas, false);
 
   resizeCanvas();
 
