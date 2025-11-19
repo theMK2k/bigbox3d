@@ -39,43 +39,77 @@
       precision mediump float;
 
       varying vec2 vTextureCoord;
+      varying vec3 vNormal;
+      varying vec3 vPosition;
 
       uniform sampler2D uSampler;
       uniform vec2 uTextureSize;
       uniform float uPerspectiveAngle;
+      uniform vec3 uLightPosition;
 
       void main(void) {
           // Calculate blur amount based on zoom level (perspectiveAngle)
-          // blurAmount = (perspectiveAngle - 44.0) * 10.0
-          // At perspectiveAngle=44 (zoomed in): blurAmount=0
-          // At perspectiveAngle=45 (default): blurAmount=10
           vec2 texelSize = vec2(1.0) / uTextureSize;
           float blurAmount = (uPerspectiveAngle - 44.0) * 10.0;
           
           // Sample the texture with a blur kernel proportional to zoom
-          vec4 color = texture2D(uSampler, vTextureCoord) * 0.4;
-          color += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
-          color += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
-          color += texture2D(uSampler, vTextureCoord + vec2(0.0, texelSize.y * blurAmount)) * 0.15;
-          color += texture2D(uSampler, vTextureCoord - vec2(0.0, texelSize.y * blurAmount)) * 0.15;
+          vec4 texColor = texture2D(uSampler, vTextureCoord) * 0.4;
+          texColor += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
+          texColor += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
+          texColor += texture2D(uSampler, vTextureCoord + vec2(0.0, texelSize.y * blurAmount)) * 0.15;
+          texColor += texture2D(uSampler, vTextureCoord - vec2(0.0, texelSize.y * blurAmount)) * 0.15;
           
-          gl_FragColor = color;
+          // Spotlight effect
+          vec3 normal = normalize(vNormal);
+          vec3 lightDir = normalize(uLightPosition - vPosition);
+          
+          // Diffuse lighting
+          float diff = max(dot(normal, lightDir), 0.0);
+          
+          // Distance attenuation (reduced for more visible lighting)
+          float distance = length(uLightPosition - vPosition);
+          float attenuation = 1.0 / (1.0 + 0.05 * distance + 0.01 * distance * distance);
+          
+          // Spotlight cone (wider angle for more coverage)
+          vec3 spotDir = normalize(vec3(0.0, 0.0, -1.0)); // pointing toward the box
+          float theta = dot(lightDir, normalize(-spotDir));
+          float spotCutoff = cos(radians(20.0)); // spotlight angle (wider)
+          float spotOuterCutoff = cos(radians(30.0));
+          float epsilon = spotCutoff - spotOuterCutoff;
+          float intensity = clamp((theta - spotOuterCutoff) / epsilon, 0.0, 1.0);
+          
+          // Ambient + diffuse lighting (brighter)
+          vec3 ambient = vec3(0.6); // increased ambient light
+          vec3 diffuse = vec3(1.5) * diff * attenuation * intensity; // boosted diffuse
+          
+          vec3 lighting = ambient + diffuse;
+          lighting = min(lighting, vec3(1.2)); // allow slight overbright for highlight effect
+          vec4 finalColor = vec4(texColor.rgb * lighting, texColor.a);
+          
+          gl_FragColor = finalColor;
       }
     </script>
 
     <script id="shader-vs" type="x-shader/x-vertex">
       attribute vec3 aVertexPosition;
+      attribute vec3 aVertexNormal;
       attribute vec2 aTextureCoord;
 
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
+      uniform mat3 uNormalMatrix;
 
       varying vec2 vTextureCoord;
-
+      varying vec3 vNormal;
+      varying vec3 vPosition;
 
       void main(void) {
-          gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+          vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
+          gl_Position = uPMatrix * mvPosition;
+          
           vTextureCoord = aTextureCoord;
+          vNormal = uNormalMatrix * aVertexNormal;
+          vPosition = mvPosition.xyz;
       }
     </script>
 

@@ -102,6 +102,7 @@ const pMatrix = glMatrix.mat4.create();
 
 let vertBuffer = null;
 let coordBuffer = null;
+let normalBuffer = null;
 let IndexBuffer = null;
 
 let xRot = 0;
@@ -402,6 +403,19 @@ function initShaders() {
     shaderProgram.program,
     "uPerspectiveAngle"
   );
+  shaderProgram.program.normalMatrixUniform = gl.getUniformLocation(
+    shaderProgram.program,
+    "uNormalMatrix"
+  );
+  shaderProgram.program.lightPositionUniform = gl.getUniformLocation(
+    shaderProgram.program,
+    "uLightPosition"
+  );
+  shaderProgram.program.vertexNormalAttribute = gl.getAttribLocation(
+    shaderProgram.program,
+    "aVertexNormal"
+  );
+  gl.enableVertexAttribArray(shaderProgram.program.vertexNormalAttribute);
 }
 
 function initTexture(sFilename, textures) {
@@ -629,6 +643,51 @@ function initBuffers() {
   coordBuffer.itemSize = 2;
   coordBuffer.numItems = 24;
 
+  // Normal vectors for each face
+  normalBuffer = {};
+  normalBuffer.buffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer.buffer);
+  const normals = [
+    // Front face (pointing toward +Z)
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+    0.0, 0.0, 1.0,
+
+    // Back face (pointing toward -Z)
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+    0.0, 0.0, -1.0,
+
+    // Top face (pointing toward +Y)
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+    0.0, 1.0, 0.0,
+
+    // Bottom face (pointing toward -Y)
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+    0.0, -1.0, 0.0,
+
+    // Right face (pointing toward +X)
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+    1.0, 0.0, 0.0,
+
+    // Left face (pointing toward -X)
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+    -1.0, 0.0, 0.0,
+  ];
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
+  normalBuffer.itemSize = 3;
+  normalBuffer.numItems = 24;
+
   IndexBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, IndexBuffer);
   const Indices = [
@@ -712,6 +771,14 @@ function drawScene() {
 
   setMatrixUniforms();
   
+  // Calculate and pass normal matrix (transpose of inverse of modelview)
+  const normalMatrix = glMatrix.mat3.create();
+  glMatrix.mat3.normalFromMat4(normalMatrix, mvMatrix);
+  gl.uniformMatrix3fv(shaderProgram.program.normalMatrixUniform, false, normalMatrix);
+  
+  // Pass light position (positioned above and in front of the box)
+  gl.uniform3f(shaderProgram.program.lightPositionUniform, 0.0, 3.0, 5.0);
+  
   // Pass perspective angle to shader for dynamic blur adjustment
   gl.uniform1f(shaderProgram.program.perspectiveAngleUniform, perspectiveAngle);
 
@@ -728,6 +795,15 @@ function drawScene() {
   gl.vertexAttribPointer(
     shaderProgram.program.textureCoordAttribute,
     coordBuffer.itemSize,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+  gl.bindBuffer(gl.ARRAY_BUFFER, normalBuffer.buffer);
+  gl.vertexAttribPointer(
+    shaderProgram.program.vertexNormalAttribute,
+    normalBuffer.itemSize,
     gl.FLOAT,
     false,
     0,
