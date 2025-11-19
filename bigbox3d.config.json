@@ -10,7 +10,8 @@
   "bgpattern": true,
   "bginterval": 10,
   "rotation_speed": 20,
-  "rotation_amortization": 1,
+  "initial_rotation_amortization": 0.91,
+  "general_rotation_amortization": 0.91,
   "rotation_initial_x": -0.15,
   "rotation_initial_y": 0.000001
 }

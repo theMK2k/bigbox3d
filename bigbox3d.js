@@ -38,7 +38,8 @@ const opts = {
   extlink: "https://github.com/theMK2k/bigbox3d", // an external link to be displayed in the bottom left corner
   extlink_innerhtml: "scanned by MK2k, presented with <b>Big Box 3D</b>", // the innerHTML of the external link,
   rotation_speed: 20, // the rotation speed of the box when mouse-dragged (default: 20, range: 1-100)
-  rotation_amortization: 0.91, // the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)
+  initial_rotation_amortization: 0.91, // the initial amortization of the rotation speed (set this to 1 to have the box rotate indefinitely until the user interacts with it)
+  general_rotation_amortization: 0.91, // the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)
   rotation_initial_x: 0.15, // initial rotation on the x-axis (default: 0.15, range: 0.0-1.0)
   rotation_initial_y: -0.15, // initial rotation on the y-axis (default: -0.15, range: 0.0-1.0)
 };
@@ -858,14 +859,20 @@ function drawScene() {
   gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 60);
 }
 
+let hasUserInteracted = false;
+
+function getRotationAmortization() {
+  return !hasUserInteracted ? opts.initial_rotation_amortization : opts.general_rotation_amortization;
+}
+
 function animate() {
   if (!allTexturesLoaded) return;
 
   const timeNow = new Date().getTime();
 
   if (dragMode === enmDragMode.none && lastDragMode === enmDragMode.rotate) {
-    dX *= opts.rotation_amortization;
-    dY *= opts.rotation_amortization;
+    dX *= getRotationAmortization();
+    dY *= getRotationAmortization();
     THETA += opts.rotation_speed * dX;
     PHI += opts.rotation_speed * dY;
   }
@@ -947,6 +954,8 @@ const mouseWheel = function (event) {
 const keyDown = function (event) {
   logger.log("keyDown:", event);
 
+  hasUserInteracted = true;
+
   let x = 0;
   let y = 0;
 
@@ -996,6 +1005,8 @@ function onPointerDown(e) {
   // The pointerdown event signals the start of a touch interaction.
   // This event is cached to support 2-finger gestures
   // logger.log("onPointerDown", e);
+
+  hasUserInteracted = true;
 
   if (!pointerCache.find((pointer) => pointer.pointerId === e.pointerId)) {
     pointerCache.push(e);
@@ -1140,8 +1151,10 @@ function init() {
   opts.bg = "#" + (getQueryVariable("bg") || config.bg || opts.bg);
 
   opts.rotation_speed = config.rotation_speed || opts.rotation_speed;
-  opts.rotation_amortization =
-    config.rotation_amortization || opts.rotation_amortization;
+  opts.initial_rotation_amortization =
+    config.initial_rotation_amortization || opts.initial_rotation_amortization;
+  opts.general_rotation_amortization =
+    config.general_rotation_amortization || opts.general_rotation_amortization;
   opts.rotation_initial_x =
     config.rotation_initial_x || opts.rotation_initial_x;
   opts.rotation_initial_y =
@@ -1150,9 +1163,9 @@ function init() {
   // initial rotation
   const amortization_factor =
     Math.abs(
-      (0.91 - opts.rotation_amortization) *
-        (0.91 - opts.rotation_amortization) *
-        (0.91 - opts.rotation_amortization) *
+      (0.91 - getRotationAmortization()) *
+        (0.91 - getRotationAmortization()) *
+        (0.91 - getRotationAmortization()) *
         25000
     ) + 1;
   dX =

@@ -10,7 +10,8 @@
     "extlink": "https://github.com/theMK2k/bigbox3d",
     "extlink_innerhtml": "sample of <b>Big Box 3D</b>",
     "rotation_speed": 20,
-    "rotation_amortization": 0.91,
+    "initial_rotation_amortization": 0.91,
+    "general_rotation_amortization": 0.91,
     "rotation_initial_x": 0.15,
     "rotation_initial_y": -0.15
 }

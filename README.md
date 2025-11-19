@@ -61,7 +61,8 @@ option|description|default value|example
 extlink|an external link to be displayed in the bottom left corner|`https://github.com/theMK2k/bigbox3d`|`https://your.site`
 extlink_innerhtml|the innerHTML of the external link|`scanned by MK2k, presented with <b>Big Box 3D</b>`|`scanned by me`
 rotation_speed|the rotation speed of the box when mouse-dragged (default: 20, range: 1-100)|`20`|`40` for faster rotation when mouse-dragged
-rotation_amortization|the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)|`0.91`|`0.99` for slower amortization, `0.87` for faster amortization, `1.0` for no amortization at all
+initial_rotation_amortization|the initial amortization of the rotation speed (set this to 1 to have the box rotate indefinitely until the user interacts with it)|`1`|`0.99` for slower amortization, `0.87` for faster amortization, `1.0` for no amortization at all
+general_rotation_amortization|the amortization of the rotation speed when mouse released (default: 0.91, range: 0.1-1.0)|`0.91`|`0.99` for slower amortization, `0.87` for faster amortization, `1.0` for no amortization at all
 rotation_initial_x|initial rotation on the x-axis (default: 0.15, range: -1.0 to 1.0)|`0.15`|`0.20` for a faster initial rotation, `-0.15` for inverted initial rotation
 rotation_initial_y|initial rotation on the y-axis (default: -0.15, range: -1.0 to 1.0)|`-0.15`|`-0.20` for a faster initial rotation, `0.15` for inverted initial rotation
 
