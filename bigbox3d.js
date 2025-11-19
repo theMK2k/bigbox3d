@@ -113,6 +113,8 @@ let lastTime = 0;
 
 let THETA = 0;
 let PHI = 0;
+
+let baseBlurAmount = 10.0; // Default blur amount, will be calculated based on front image size
 // #endregion Variables and Enums
 
 // #region Helper Functions
@@ -403,6 +405,10 @@ function initShaders() {
     shaderProgram.program,
     "uPerspectiveAngle"
   );
+  shaderProgram.program.baseBlurAmountUniform = gl.getUniformLocation(
+    shaderProgram.program,
+    "uBaseBlurAmount"
+  );
   shaderProgram.program.normalMatrixUniform = gl.getUniformLocation(
     shaderProgram.program,
     "uNormalMatrix"
@@ -487,6 +493,13 @@ function initTexture(sFilename, textures) {
 
     if (allTexturesLoaded) {
       logger.log("all textures loaded!");
+      
+      // Calculate blur amount based on front image size
+      const frontImage = texturen[enmFaces.front].image;
+      const imageSize = frontImage.width * frontImage.height;
+
+      baseBlurAmount = (imageSize / 24000000) * 10.0;
+      logger.log("Front image size:", imageSize, "Base blur amount:", baseBlurAmount);
 
       // TODO: fade-out
       document.getElementById("loading").style.display = "none";
@@ -781,6 +794,9 @@ function drawScene() {
   
   // Pass perspective angle to shader for dynamic blur adjustment
   gl.uniform1f(shaderProgram.program.perspectiveAngleUniform, perspectiveAngle);
+  
+  // Pass base blur amount to shader (calculated based on front image size)
+  gl.uniform1f(shaderProgram.program.baseBlurAmountUniform, baseBlurAmount);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vertBuffer.buffer);
   gl.vertexAttribPointer(

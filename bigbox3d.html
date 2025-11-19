@@ -45,12 +45,13 @@
       uniform sampler2D uSampler;
       uniform vec2 uTextureSize;
       uniform float uPerspectiveAngle;
+      uniform float uBaseBlurAmount;
       uniform vec3 uLightPosition;
 
       void main(void) {
-          // Calculate blur amount based on zoom level (perspectiveAngle)
+          // Calculate blur amount based on zoom level (perspectiveAngle) and image size
           vec2 texelSize = vec2(1.0) / uTextureSize;
-          float blurAmount = (uPerspectiveAngle - 44.0) * 10.0;
+          float blurAmount = (uPerspectiveAngle - 44.0) * uBaseBlurAmount;
           
           // Sample the texture with a blur kernel proportional to zoom
           vec4 texColor = texture2D(uSampler, vTextureCoord) * 0.4;
