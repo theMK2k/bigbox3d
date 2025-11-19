@@ -1225,8 +1225,6 @@ function webGLStart() {
       gl.viewportWidth = canvas.width;
       gl.viewportHeight = canvas.height;
     }
-    
-    redraw();
   }
 
   // Add window resize listener
