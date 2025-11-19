@@ -69,7 +69,7 @@
           
           // Specular lighting (Blinn-Phong) - EXTREMELY BRIGHT
           vec3 halfDir = normalize(lightDir + viewDir);
-          float spec = pow(max(dot(normal, halfDir), 0.0), 16.0); // reduced shininess = larger highlight
+          float spec = pow(max(dot(normal, halfDir), 0.0), 128.0); // reduced shininess = larger highlight
           
           // Distance attenuation (minimal for very bright lighting)
           float distance = length(uLightPosition - vPosition);
@@ -78,15 +78,15 @@
           // Spotlight cone (very wide for maximum coverage)
           vec3 spotDir = normalize(vec3(0.0, 0.0, -1.0)); // pointing toward the box
           float theta = dot(lightDir, normalize(-spotDir));
-          float spotCutoff = cos(radians(50.0)); // very wide spotlight
-          float spotOuterCutoff = cos(radians(60.0));
+          float spotCutoff = cos(radians(20.0)); // very wide spotlight
+          float spotOuterCutoff = cos(radians(30.0));
           float epsilon = spotCutoff - spotOuterCutoff;
           float intensity = clamp((theta - spotOuterCutoff) / epsilon, 0.0, 1.0);
           
           // Ambient + diffuse + EXTREMELY bright specular lighting
           vec3 ambient = vec3(0.5); // ambient light
           vec3 diffuse = vec3(1.0) * diff * attenuation * intensity;
-          vec3 specular = vec3(5.0) * spec * attenuation * intensity; // EXTREMELY BRIGHT specular
+          vec3 specular = vec3(1.5) * spec * attenuation * intensity; // EXTREMELY BRIGHT specular
           
           vec3 lighting = ambient + diffuse + specular;
           vec4 finalColor = vec4(texColor.rgb * lighting, texColor.a);
