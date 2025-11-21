@@ -1078,7 +1078,7 @@ function onPointerMove(e) {
     
     // Apply the zoom factor with reduced sensitivity (0.5 multiplier for smooth control)
     // Negative sign because smaller perspective angle = more zoomed in
-    perspectiveAngle = pinch.initialPerspectiveAngle - zoomFactor * 0.5;
+    perspectiveAngle = pinch.initialPerspectiveAngle - zoomFactor * 0.2;
 
     if (perspectiveAngle < 44) perspectiveAngle = 44;
     if (perspectiveAngle > 46) perspectiveAngle = 46;
