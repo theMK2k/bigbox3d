@@ -1,6 +1,6 @@
 {
-  "host": "https://mk2k.net",
-  "path": "/bigbox3d/img/",
+  "host": "https://bigbox3d.net",
+  "path": "/img/",
   "ext": "jpg",
   "bgext": "gif",
   "bg": "000000",
@@ -10,8 +10,8 @@
   "bgpattern": true,
   "bginterval": 10,
   "rotation_speed": 20,
-  "initial_rotation_amortization": 0.91,
-  "general_rotation_amortization": 0.91,
+  "initial_rotation_amortization": 1,
+  "rotation_amortization": 1,
   "rotation_initial_x": -0.15,
   "rotation_initial_y": 0.000001
 }
