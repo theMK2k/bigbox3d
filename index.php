@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>BigBox3D Gallery</title>
+  <title>Big Box 3D</title>
   <style>
     * {
       margin: 0;
@@ -13,7 +13,7 @@
     }
 
     body {
-      font-family: Arial, sans-serif;
+      font-family: Roboto, sans-serif;
       background-color: #1a1a1a;
       padding: 20px;
     }
@@ -26,7 +26,7 @@
     h1 {
       color: #fff;
       text-align: center;
-      margin-bottom: 40px;
+      margin-bottom: 16px;
       font-size: 2.5rem;
     }
 
@@ -77,7 +77,8 @@
 
 <body>
   <div class="container">
-    <h1>BigBox3D Gallery</h1>
+    <h1>BIG BOX 3D</h1>
+    <p style="text-align: center; color: lightgray; font-style: italic">- a virtual big box game collection in mostly 600dpi -</p>
     <div class="gallery">
       <?php
       // Scan the img directory for preview images
