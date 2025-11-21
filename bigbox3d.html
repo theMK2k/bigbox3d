@@ -50,17 +50,45 @@
       uniform vec3 uLightPosition;
 
       void main(void) {
-          // Calculate blur amount based on zoom level (perspectiveAngle) and image size
+          // Calculate adaptive blur for moiré reduction
           vec2 texelSize = vec2(1.0) / uTextureSize;
-          float blurAmount = (uPerspectiveAngle - 44.0) * uBaseBlurAmount;
-
-          // Sample the texture with a blur kernel proportional to zoom
-          vec4 texColor = texture2D(uSampler, vTextureCoord) * 0.4;
-          texColor += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
-          texColor += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
-          texColor += texture2D(uSampler, vTextureCoord + vec2(0.0, texelSize.y * blurAmount)) * 0.15;
-          texColor += texture2D(uSampler, vTextureCoord - vec2(0.0, texelSize.y * blurAmount)) * 0.15;
-
+          
+          // Enhanced blur calculation with stronger effect at closer zoom levels
+          float zoomFactor = (uPerspectiveAngle - 44.0) / 2.0; // Normalized 0-1 range
+          float blurAmount = zoomFactor * uBaseBlurAmount;
+          
+          // Add base blur to combat moiré even when fully zoomed in
+          float baseAntiMoire = 0.8; // Minimum blur for moiré reduction
+          blurAmount = max(blurAmount, baseAntiMoire);
+          
+          // 13-tap rotated grid blur kernel for better moiré suppression
+          // Uses a pattern that's rotated 45° to break up regular sampling patterns
+          vec4 texColor = vec4(0.0);
+          
+          // Center sample (highest weight)
+          texColor += texture2D(uSampler, vTextureCoord) * 0.20;
+          
+          // Inner ring (4 samples at 45° intervals)
+          float innerRadius = blurAmount * 0.5;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(innerRadius, 0.0)) * 0.125;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(0.0, innerRadius)) * 0.125;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(-innerRadius, 0.0)) * 0.125;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(0.0, -innerRadius)) * 0.125;
+          
+          // Diagonal samples (4 samples at 45° diagonals) - critical for moiré
+          float diagRadius = innerRadius * 0.707; // sqrt(2)/2
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(diagRadius, diagRadius)) * 0.08;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(-diagRadius, diagRadius)) * 0.08;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(-diagRadius, -diagRadius)) * 0.08;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(diagRadius, -diagRadius)) * 0.08;
+          
+          // Outer ring (4 samples for additional smoothing)
+          float outerRadius = blurAmount;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(outerRadius, 0.0)) * 0.03;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(0.0, outerRadius)) * 0.03;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(-outerRadius, 0.0)) * 0.03;
+          texColor += texture2D(uSampler, vTextureCoord + texelSize * vec2(0.0, -outerRadius)) * 0.03;
+          
           // Spotlight effect
           vec3 normal = normalize(vNormal);
           vec3 lightDir = normalize(uLightPosition - vPosition);

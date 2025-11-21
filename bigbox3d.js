@@ -500,6 +500,7 @@ function initTexture(sFilename, textures) {
       const imageSize = frontImage.width * frontImage.height;
 
       baseBlurAmount = (imageSize / 24000000) * 10.0;
+      
       logger.log("Front image size:", imageSize, "Base blur amount:", baseBlurAmount);
 
       // TODO: fade-out
