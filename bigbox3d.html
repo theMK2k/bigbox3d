@@ -88,7 +88,7 @@
           // Ambient + diffuse + EXTREMELY bright specular lighting
           vec3 ambient = vec3(0.5); // ambient light
           vec3 diffuse = vec3(1.0) * diff * attenuation * intensity;
-          vec3 specular = vec3(1.5) * spec * attenuation * intensity; // EXTREMELY BRIGHT specular
+          vec3 specular = vec3(1.5) * spec * attenuation * intensity * 0.3; // 0.3 to reduce specular intensity (as long as we don't have specular maps)
           
           vec3 lighting = ambient + diffuse + specular;
           vec4 finalColor = vec4(texColor.rgb * lighting, texColor.a);
