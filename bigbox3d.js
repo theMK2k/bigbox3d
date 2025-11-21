@@ -1065,12 +1065,19 @@ function onPointerMove(e) {
   }
 
   if (pointerCache.length === 2) {
-    // pinch zoom
+    // pinch zoom with proportional/logarithmic scaling
     const distance = getDistance(pointerCache[0], pointerCache[1]);
 
-    const diff = pinch.initialDistance - distance;
-
-    perspectiveAngle = pinch.initialPerspectiveAngle + diff * 0.01;
+    // Calculate the ratio of current distance to initial distance
+    const ratio = distance / pinch.initialDistance;
+    
+    // Apply logarithmic scaling for smoother zoom across all zoom levels
+    // Log base 2 provides intuitive doubling/halving behavior
+    const zoomFactor = Math.log(ratio) / Math.log(2);
+    
+    // Apply the zoom factor with reduced sensitivity (0.5 multiplier for smooth control)
+    // Negative sign because smaller perspective angle = more zoomed in
+    perspectiveAngle = pinch.initialPerspectiveAngle - zoomFactor * 0.5;
 
     if (perspectiveAngle < 44) perspectiveAngle = 44;
     if (perspectiveAngle > 46) perspectiveAngle = 46;
