@@ -86,8 +86,11 @@
       $previewSuffix = '-preview.jpg';
       $items = [];
 
-      if (is_dir($imgDir)) {
-        $files = scandir($imgDir);
+      // Resolve symbolic links to actual directory path
+      $realImgDir = realpath($imgDir);
+
+      if ($realImgDir !== false && is_dir($realImgDir)) {
+        $files = scandir($realImgDir);
 
         foreach ($files as $file) {
           // Check if file ends with "-preview.jpg"
