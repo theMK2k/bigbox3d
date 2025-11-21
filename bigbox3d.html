@@ -53,30 +53,30 @@
           // Calculate blur amount based on zoom level (perspectiveAngle) and image size
           vec2 texelSize = vec2(1.0) / uTextureSize;
           float blurAmount = (uPerspectiveAngle - 44.0) * uBaseBlurAmount;
-          
+
           // Sample the texture with a blur kernel proportional to zoom
           vec4 texColor = texture2D(uSampler, vTextureCoord) * 0.4;
           texColor += texture2D(uSampler, vTextureCoord + vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
           texColor += texture2D(uSampler, vTextureCoord - vec2(texelSize.x * blurAmount, 0.0)) * 0.15;
           texColor += texture2D(uSampler, vTextureCoord + vec2(0.0, texelSize.y * blurAmount)) * 0.15;
           texColor += texture2D(uSampler, vTextureCoord - vec2(0.0, texelSize.y * blurAmount)) * 0.15;
-          
+
           // Spotlight effect
           vec3 normal = normalize(vNormal);
           vec3 lightDir = normalize(uLightPosition - vPosition);
           vec3 viewDir = normalize(-vPosition); // camera is at origin in view space
-          
+
           // Diffuse lighting
           float diff = max(dot(normal, lightDir), 0.0);
-          
+
           // Specular lighting (Blinn-Phong) - EXTREMELY BRIGHT
           vec3 halfDir = normalize(lightDir + viewDir);
           float spec = pow(max(dot(normal, halfDir), 0.0), 128.0); // reduced shininess = larger highlight
-          
+
           // Distance attenuation (minimal for very bright lighting)
           float distance = length(uLightPosition - vPosition);
           float attenuation = 1.0 / (1.0 + 0.02 * distance + 0.005 * distance * distance);
-          
+
           // Spotlight cone (very wide for maximum coverage)
           vec3 spotDir = normalize(vec3(0.0, 0.0, -1.0)); // pointing toward the box
           float theta = dot(lightDir, normalize(-spotDir));
@@ -84,15 +84,15 @@
           float spotOuterCutoff = cos(radians(30.0));
           float epsilon = spotCutoff - spotOuterCutoff;
           float intensity = clamp((theta - spotOuterCutoff) / epsilon, 0.0, 1.0);
-          
+
           // Ambient + diffuse + EXTREMELY bright specular lighting
           vec3 ambient = vec3(0.5); // ambient light
           vec3 diffuse = vec3(1.0) * diff * attenuation * intensity;
           vec3 specular = vec3(1.5) * spec * attenuation * intensity * 0.3; // 0.3 to reduce specular intensity (as long as we don't have specular maps)
-          
+
           vec3 lighting = ambient + diffuse + specular;
           vec4 finalColor = vec4(texColor.rgb * lighting, texColor.a);
-          
+
           gl_FragColor = finalColor;
       }
     </script>
@@ -113,7 +113,7 @@
       void main(void) {
           vec4 mvPosition = uMVMatrix * vec4(aVertexPosition, 1.0);
           gl_Position = uPMatrix * mvPosition;
-          
+
           vTextureCoord = aTextureCoord;
           vNormal = uNormalMatrix * aVertexNormal;
           vPosition = mvPosition.xyz;
